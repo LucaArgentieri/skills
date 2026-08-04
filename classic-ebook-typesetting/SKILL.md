@@ -1,6 +1,6 @@
 ---
 name: classic-ebook-typesetting
-description: This skill should be used when the user asks to "typeset an ebook", "impaginare un ebook come un libro classico", "convert an ebook/PDF into a classic book layout", "create a book cover for a PDF", "generate a Gumroad-ready ebook cover", or otherwise wants a PDF ebook laid out with classic print-book typography (serif font, justified text, chapter openings, page numbers) without using LaTeX. Also applies when the user wants a full-bleed illustrated book cover embedded as the first page of an ebook PDF, or wants that same cover exported in multiple aspect ratios for a storefront listing.
+description: This skill should be used when the user asks to "typeset an ebook", "impaginare un ebook come un libro classico", "convert an ebook/PDF into a classic book layout", "create a book cover for a PDF", "generate a Gumroad-ready ebook cover", "also make an EPUB", "esporta anche in EPUB", or otherwise wants an ebook laid out with classic print-book typography (serif font, justified text, chapter openings, page numbers) as a PDF and/or exported as a reflowable EPUB — all without using LaTeX, Calibre, or pandoc. Also applies when the user wants a full-bleed illustrated book cover embedded as the first page of an ebook, or wants that same cover exported in multiple aspect ratios for a storefront listing.
 ---
 
 # Classic ebook typesetting (no LaTeX)
@@ -25,6 +25,21 @@ Skip this skill for content with heavy math/formulas (LaTeX would genuinely be b
 
 Read `references/pitfalls.md` before implementing — it documents specific bugs hit while building this pipeline and their fixes, so they aren't rediscovered from scratch.
 
+## Optional: EPUB export
+
+If the user also wants a reflowable EPUB (not just the fixed-layout PDF),
+read `references/epub-basics.md` first — EPUB is a fundamentally different
+format (reader-controlled reflow, not fixed 6×9in pages), so almost none of
+the PDF's `@page`/page-number/cover-page CSS carries over. The recommended
+approach is to generate the EPUB **from the same `book.html`** rather than
+duplicating the text: `assets/build-epub.js` parses each
+`<section class="chapter">` out of `book.html` with `cheerio` and feeds it to
+`@lesjoursfr/html-to-epub` (a pure-npm library — no pandoc/Calibre needed),
+reusing the same 2:3 cover image generated for the PDF. Install with `npm
+install @lesjoursfr/html-to-epub cheerio`, edit the constants at the top of
+the script, then `node build-epub.js`. Verify the result structurally with
+`unzip -l book.epub` (see `references/epub-basics.md` for what to check).
+
 ## Key CSS decisions worth calling out inline
 
 - `@page { size: 6in 9in; margin: ...; }` with **identical margins on every page** (left/right/top/bottom), not the mirrored inner/outer margins used in bound print books — a screen-read PDF has no "facing pages," so mirrored margins just look inconsistent between pages.
@@ -39,3 +54,5 @@ Read `references/pitfalls.md` before implementing — it documents specific bugs
 - `assets/render-cover.js` — generic Playwright screenshot-render script for cover images, supports rendering multiple `{html, out, width, height}` variants in one run.
 - `references/pitfalls.md` — concrete bugs hit and fixes (CORS, waitForFunction signature, Paged.js native footnotes being unreliable, mirrored-margin/alternating-folio mistakes, the chapter-open header/footer bug, avoiding orphaned chapter-ending lines).
 - `references/cover-generation.md` — the canvas-whitening technique for illustration backgrounds, and the multi-aspect-ratio export pattern.
+- `assets/build-epub.js` — generic EPUB builder that reuses `book.html` as its content source.
+- `references/epub-basics.md` — what's different about EPUB vs. the PDF pipeline, and how to verify the output.
