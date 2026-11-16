@@ -40,7 +40,7 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 
 ### [Multiplexers](./skills/multiplexers/README.md)
 
-- **[delegate-to-pane](./skills/multiplexers/delegate-to-pane/SKILL.md)**: Run a subagent in a visible pane of the current workspace (herdr, Orca, rex, tmux), briefed in English, closed only when its subtask is verified complete.
+- **[delegate-to-pane](./skills/multiplexers/delegate-to-pane/SKILL.md)**: Delegation policy inside herdr, Orca or rex: a visible pane per subagent, an English brief, a cheaper model for execution-only tasks, and a close gate on verified completion.
 
 ## Writing a new skill
 
