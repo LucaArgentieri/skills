@@ -1,6 +1,6 @@
 ---
 name: delegate-to-pane
-description: Run a subagent as a visible agent in a new pane of the current multiplexer workspace (herdr, rex, tmux), briefed in English and kept open until its subtask is verified complete. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent, while you run inside a multiplexer.
+description: Run a subagent as a visible agent in a new pane of the current multiplexer workspace (herdr, Orca, rex, tmux), briefed in English and kept open until its subtask is verified complete. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent, while you run inside a multiplexer.
 ---
 
 # Delegate to a pane
@@ -25,6 +25,7 @@ Check in this order and read the matching file:
 | Check | Backend | Read |
 | --- | --- | --- |
 | `test "${HERDR_ENV:-}" = 1` | herdr | [HERDR.md](HERDR.md) |
+| `test -n "${ORCA_TERMINAL_HANDLE:-}"` | Orca | [ORCA.md](ORCA.md) |
 | `test -n "${REX_BLOCK:-}"` | rex | [REX.md](REX.md) |
 | `test -n "${TMUX:-}"` | tmux | [TMUX.md](TMUX.md) |
 
