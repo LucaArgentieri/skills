@@ -1,21 +1,46 @@
 ---
 name: delegate-to-pane
-description: Decide how a subagent is run when you delegate from inside herdr, Orca or rex - its own visible pane in your workspace, an English brief, the cheapest model that fits, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
+description: Decide how a subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, the cheapest model that fits, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
 ---
 
 # Delegate to a pane
 
 A delegation policy. It decides where a subagent runs, how it is briefed, which model it gets, and when it may close.
 
-The pane commands belong to each multiplexer. Use the multiplexer's own skill or CLI help for them, and keep its rules as they are:
+It works with any multiplexer. The pane commands belong to the multiplexer: learn them from its own skill or CLI help, and keep its rules as they are.
 
-| Check | Multiplexer | Commands from |
+## Find the multiplexer
+
+1. **Its skill.** Many multiplexers ship a skill for agents. If one among your skills controls the terminal you run in, use it.
+2. **Environment.** Multiplexers mark their panes with variables, usually a session or pane ID. List them with `env | cut -d= -f1 | sort` and look for a tool prefix.
+3. **Process tree.** Walk up from your shell to see what hosts it:
+
+   ```bash
+   pid=$$; while [ "${pid:-1}" -gt 1 ]; do ps -o comm= -p "$pid"; pid=$(ps -o ppid= -p "$pid" | tr -d ' '); done
+   ```
+
+Known today, as examples:
+
+| Marker | Multiplexer | Commands from |
 | --- | --- | --- |
-| `test "${HERDR_ENV:-}" = 1` | herdr | its `herdr` skill, or `herdr --help` |
-| `test -n "${ORCA_TERMINAL_HANDLE:-}"` | Orca | `orca skills get orca-cli` |
-| `test -n "${REX_BLOCK:-}"` | rex | its agent skill (`rex skill setup`), or `rex help` |
+| `HERDR_ENV=1` | herdr | its `herdr` skill, or `herdr --help` |
+| `ORCA_TERMINAL_HANDLE` | Orca | `orca skills get orca-cli` |
+| `REX_BLOCK` | rex | its agent skill, or `rex help` |
+| `TMUX` | tmux | `man tmux` |
 
-When none matches, tell the user in one line and use your agent's own subagent mechanism, or work inline. The brief, model choice and close gate still apply.
+For one you don't know, read `<tool> --help` (or `<tool> help`) and its docs. A bare `<tool>` with no arguments often opens its UI, so always pass a help flag.
+
+From the skill or the help, find a command for each **capability**:
+
+- split a new pane beside a given pane, with a working directory
+- run a command in it
+- send text and Enter to it
+- read its output
+- wait for it to go idle, or poll the output
+- close it by ID
+- your own pane's ID (usually an environment variable)
+
+**Done when** you have a command for every capability. If one is missing, or no multiplexer is found, tell the user in one line and use your agent's own subagent mechanism, or work inline. The brief, model choice and close gate still apply.
 
 ## Hard rules
 
