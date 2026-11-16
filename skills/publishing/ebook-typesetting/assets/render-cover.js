@@ -1,11 +1,11 @@
 // Generic Playwright screenshot renderer for book-cover HTML pages, for the
-// classic-ebook-typesetting skill. Renders one or more {html, out, width,
+// ebook-typesetting skill. Renders one or more {html, out, width,
 // height} variants — e.g. a 2:3 book cover, a 1:1 square, and a 16:9
 // landscape crop — from separate small HTML files that share the same
 // illustration/title markup but different layout.
 //
 // Each cover HTML file should apply the canvas-whitening technique from
-// references/cover-generation.md to the illustration image and set
+// COVER.md to the illustration image and set
 // `window.__coverReady = true` when the canvas has been painted, so this
 // script knows when it's safe to screenshot.
 //

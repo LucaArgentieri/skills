@@ -80,7 +80,7 @@ the cover image is present and referenced, and glossary/reference sections
 ## Cover image reuse
 
 The EPUB cover should be the same 2:3 illustrated cover generated for the PDF
-(see the sibling `references/cover-generation.md`) — pass its file path
+(see `COVER.md`) — pass its file path
 directly as the `cover` option; the generator handles embedding it and
 wiring up the manifest's cover metadata. No separate cover asset is needed
 for EPUB specifically.

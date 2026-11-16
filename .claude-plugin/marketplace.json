@@ -1,0 +1,15 @@
+{
+  "name": "lucaargentieri",
+  "owner": {
+    "name": "Luca Argentieri",
+    "url": "https://lucaargentieri.github.io"
+  },
+  "description": "Luca Argentieri's agent skills.",
+  "plugins": [
+    {
+      "name": "lucaargentieri-skills",
+      "source": "./",
+      "description": "Luca Argentieri's agent skills."
+    }
+  ]
+}

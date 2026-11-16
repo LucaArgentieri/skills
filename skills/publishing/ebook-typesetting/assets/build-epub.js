@@ -1,8 +1,8 @@
-// Generic EPUB builder for the classic-ebook-typesetting skill.
+// Generic EPUB builder for the ebook-typesetting skill.
 //
 // Converts the same book.html used for the PDF pipeline into a reflowable
 // EPUB3, by extracting each <section class="chapter"> and handing its
-// content to @lesjoursfr/html-to-epub. See references/epub-basics.md for
+// content to @lesjoursfr/html-to-epub. See EPUB.md for
 // why EPUB needs a different (much simpler) CSS than the PDF's book.css,
 // and for what this script deliberately does NOT try to reuse from it.
 //
