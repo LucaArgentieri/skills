@@ -1,0 +1,13 @@
+{
+  "name": "lucaargentieri-skills",
+  "version": "0.1.0",
+  "description": "Luca Argentieri's agent skills.",
+  "author": {
+    "name": "Luca Argentieri",
+    "url": "https://lucaargentieri.github.io"
+  },
+  "repository": "https://github.com/LucaArgentieri/skills",
+  "skills": [
+    "./skills/publishing/ebook-typesetting"
+  ]
+}

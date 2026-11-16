@@ -1,4 +1,4 @@
-// Generic Paged.js -> PDF renderer for the classic-ebook-typesetting skill.
+// Generic Paged.js -> PDF renderer for the ebook-typesetting skill.
 //
 // Prerequisites in the project folder this script lives in:
 //   npm install playwright pagedjs
