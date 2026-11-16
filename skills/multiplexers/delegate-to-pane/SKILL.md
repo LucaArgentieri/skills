@@ -1,6 +1,6 @@
 ---
 name: delegate-to-pane
-description: Decide how a subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, the user's chosen model, event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
+description: Decide how a subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
 ---
 
 # Delegate to a pane
@@ -38,17 +38,32 @@ Find a command for each **capability**: split a new pane beside a given pane wit
 
 Settings come from the user's request first, then a `## Delegation` section in the project's agent instructions (`AGENTS.md`, `CLAUDE.md` or your agent's equivalent), then the user's global instructions. They may set:
 
-- the agent and model per task class (`execution`, `reasoning`)
+- the agent and model per task class (`research`, `reasoning`, `execution`, `review`, see step 3)
 - **hooks**: what to run on a subagent's events. Read [HOOKS.md](HOOKS.md) when any are defined.
 
 **Done when** you know which settings apply, or that none are set.
 
 ### 3. Classify and pick the model
 
-- **execution**: you already did the thinking. The plan names the files, the changes and the commands, and no design choice is left.
-- **reasoning**: the subagent must investigate, design, judge or choose.
+The class says what kind of thinking the task needs, and so which model fits it:
 
-When in doubt, it is reasoning. Use the agent and model the settings give for that class. With no setting, use the same agent and model as yours: the choice of cheaper, free or open-weight models is the user's.
+| Class | The subagent... | Suggested tier |
+| --- | --- | --- |
+| `research` | reads, searches and summarises, changing nothing | middle |
+| `reasoning` | designs, debugs or decides, with no plan yet | yours (top) |
+| `execution` | follows a plan you wrote: files, changes and commands named | middle, small for trivial steps |
+| `review` | critiques finished work (code review, security, tests) | top, ideally another family |
+
+When a task fits two classes, take the higher tier. When in doubt, it is `reasoning`.
+
+The settings choose agent and model per class, and they always win. Without a setting, follow the suggested tier inside your own family, for example:
+
+| You run on | Middle | Small |
+| --- | --- | --- |
+| Fable, Opus | Sonnet 5.5 | Haiku 5.5 |
+| Astra | Sol | Luna |
+
+Setups for Claude Code, Codex, opencode and a pi mix are in [MODELS.md](MODELS.md). Read it when the user asks to set up delegation, or when a setting names an agent whose model flag you don't know.
 
 **Done when** the class, agent and model are chosen.
 
@@ -57,7 +72,7 @@ When in doubt, it is reasoning. Use the agent and model the settings give for th
 The subagent shares none of your memory. Fill this template in English, terse but complete:
 
 ```
-CLASS: <execution | reasoning>
+CLASS: <research | reasoning | execution | review>
 TASK: <one sentence>
 CONTEXT: <paths, decisions, constraints, anything it cannot discover alone>
 PLAN: <execution only: the exact steps, in order>
@@ -66,6 +81,7 @@ RETURN: <exactly what to report back>
 RULES:
 - Reply in English only, as briefly as possible. If an output-compression skill is available (for example caveman), use it for every reply.
 - Stay inside TASK. Commit, push or delete only if TASK says so.
+- CLASS research or review: change nothing. Report findings with file paths or sources.
 - CLASS execution: follow PLAN as written. If reality does not fit PLAN, stop and report it instead of redesigning.
 - If a decision belongs to the user, stop and ask it in your reply.
 - If the result is longer than about 40 lines, write it to <tmp-dir>/<name>-result.md and reply with the path.

@@ -40,7 +40,7 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 
 ### [Multiplexers](./skills/multiplexers/README.md)
 
-- **[delegate-to-pane](./skills/multiplexers/delegate-to-pane/SKILL.md)**: Delegation policy inside any terminal multiplexer (herdr, Orca, rex, ...): a visible pane per subagent, an English brief, the user's chosen model per task class, event hooks for follow-up skills or subagents, and a close gate on verified completion.
+- **[delegate-to-pane](./skills/multiplexers/delegate-to-pane/SKILL.md)**: Delegation policy inside any terminal multiplexer (herdr, Orca, rex, ...): a visible pane per subagent, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks for follow-up skills or subagents, and a close gate on verified completion.
 
 ## Writing a new skill
 

@@ -13,14 +13,12 @@ Read when the delegation settings define hooks. A hook runs a skill or spawns a 
 
 ## Writing a hook
 
-One line per hook, in plain words, in the `## Delegation` section:
+One line per hook, in plain words, in the `## Delegation` section, next to the model lines from [MODELS.md](MODELS.md):
 
 ```markdown
 ## Delegation
 
-- execution: opencode, model <free-or-open-weight-model>
-- reasoning: same as mine
-- on done, when the task built or changed login, auth or sessions: spawn a reasoning subagent for a security review of the changed files
+- on done, when the task built or changed login, auth or sessions: spawn a review subagent for a security review of the changed files
 - on done, when code changed: run the `code-review` skill on the diff
 - on all-done: run the test suite and report failures
 - on blocked: tell me at once, even mid-task
