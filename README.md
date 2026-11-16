@@ -10,10 +10,19 @@ Agent skills I use for my own work. Small, single-purpose, and easy to adapt.
 
 ## Install
 
+The skills follow the open [Agent Skills](https://agentskills.io) format, so they work in Claude Code, Codex, opencode, Cursor and any other compatible agent, whatever the model behind it.
+
 Any agent, as editable files:
 
 ```bash
-npx skills@latest add LucaArgentieri/skills
+npx skills@latest add LucaArgentieri/skills            # pick the agents interactively
+npx skills@latest add LucaArgentieri/skills -a codex   # or name one
+```
+
+From a local clone, kept in sync by `git pull` (links into `~/.claude/skills` and `~/.agents/skills`):
+
+```bash
+scripts/link-skills.sh
 ```
 
 Claude Code, as a plugin:
@@ -35,4 +44,4 @@ Coming soon: herdr, rex.
 
 ## Writing a new skill
 
-The rules live in [CLAUDE.md](./CLAUDE.md) (also linked as `AGENTS.md`), so any agent working in this repo follows them.
+The rules live in [AGENTS.md](./AGENTS.md), read by Codex and most agents. `CLAUDE.md` imports it for Claude Code.

@@ -64,6 +64,8 @@ Read the rendered pages, every one. The page count proves nothing.
 - no seam around the cover art
 - TOC entries match the real page numbers
 
+Without image input, check each page as text instead: `pdftotext -layout -f N -l N book.pdf -` shows chapter starts, orphaned lines and folios. The cover seam still needs eyes, so ask the user to look at page 1.
+
 Re-render and re-verify after every text or CSS change.
 
 ## EPUB (only when asked)
