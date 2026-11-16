@@ -8,6 +8,7 @@
   },
   "repository": "https://github.com/LucaArgentieri/skills",
   "skills": [
-    "./skills/publishing/ebook-typesetting"
+    "./skills/publishing/ebook-typesetting",
+    "./skills/multiplexers/delegate-to-pane"
   ]
 }

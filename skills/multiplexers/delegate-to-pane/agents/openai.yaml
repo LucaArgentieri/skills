@@ -1,0 +1,3 @@
+interface:
+  display_name: "Delegate to Pane"
+  short_description: "Subagent in a visible multiplexer pane"
