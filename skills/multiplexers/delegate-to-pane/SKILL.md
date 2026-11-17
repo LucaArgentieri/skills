@@ -1,6 +1,6 @@
 ---
 name: delegate-to-pane
-description: Decide how a subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
+description: Decide how a spawned subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
 ---
 
 # Delegate to a pane
@@ -9,9 +9,15 @@ A delegation policy. It decides where a subagent runs, how it is briefed, which 
 
 It works with any multiplexer. The pane commands belong to the multiplexer: learn them from its own skill or CLI help, and keep its rules as they are.
 
+## Scope: spawned chats only
+
+You are the **parent**, the agent the user talks to. These rules shape only the **spawned chats**: what you send to your subagents and how they reply. Your own chat with the user stays exactly as it was before this skill: the user's language, your usual style and length, no output compression. The brief's RULES block is written for the subagent and never applies to you.
+
+A subagent that also has this skill follows its brief. It uses this skill only to delegate further, and then only for the chats it spawns.
+
 ## Hard rules
 
-1. **English only with the subagent.** The brief, follow-ups and relayed answers are in English, because it costs fewer tokens. Talk to the user in their language.
+1. **English only inside the spawned chat.** The brief, follow-ups and relayed answers are in English, because it costs fewer tokens. Your chat with the user keeps the user's language.
 2. **Close gate.** A pane closes only when step 7 passes. A subagent that says "done" is a claim, not proof.
 3. **Your panes only.** Close panes you created. Leave every other pane alone.
 4. **Approvals belong to the user.** When the subagent waits at a permission or approval prompt, show it to the user and relay their answer.
