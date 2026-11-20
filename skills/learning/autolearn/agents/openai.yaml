@@ -1,0 +1,3 @@
+interface:
+  display_name: "Autolearn"
+  short_description: "Save session lessons as project rules"

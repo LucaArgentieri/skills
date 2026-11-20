@@ -15,7 +15,7 @@ skills/
       agents/openai.yaml Codex metadata (display name, invocation policy)
 ```
 
-- Buckets group skills by domain: `publishing/`, `multiplexers/`. Add a bucket only when a skill fits none of the existing ones.
+- Buckets group skills by domain: `publishing/`, `multiplexers/`, `learning/`. Add a bucket only when a skill fits none of the existing ones.
 - The folder name is the skill's `name`: kebab-case, verb or noun phrase, no personal prefix.
 - When a bucket exists before its skills do, its `README.md` lists what is planned.
 
