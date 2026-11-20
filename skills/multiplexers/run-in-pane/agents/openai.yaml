@@ -1,0 +1,3 @@
+interface:
+  display_name: "Run in Pane"
+  short_description: "Dev servers and watchers in visible panes"
