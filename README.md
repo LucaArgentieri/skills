@@ -42,6 +42,11 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 
 - **[delegate-to-pane](./skills/multiplexers/delegate-to-pane/SKILL.md)**: Delegation policy inside any terminal multiplexer (herdr, Orca, rex, ...): a visible pane per subagent, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks for follow-up skills or subagents, and a close gate on verified completion.
 
+### [Learning](./skills/learning/README.md)
+
+- **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn the corrections of a session into one-line rules in the project's `AGENTS.md`.
+- **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
+
 ## Writing a new skill
 
 The rules live in [AGENTS.md](./AGENTS.md), read by Codex and most agents. `CLAUDE.md` imports it for Claude Code.

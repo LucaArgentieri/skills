@@ -1,6 +1,6 @@
 ---
 name: delegate-to-pane
-description: Decide how a spawned subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when the user asks to hand a task to a subagent ("fai fare a un subagent", "delega"), to run agents in parallel, or to spawn another agent.
+description: Decide how a spawned subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use before spawning any subagent, including with your built-in subagent tool, and when the user asks to delegate ("fai fare a un subagent", "delega") or to run agents in parallel.
 ---
 
 # Delegate to a pane
@@ -26,19 +26,26 @@ A subagent that also has this skill follows its brief. It uses this skill only t
 
 ### 1. Find the multiplexer
 
-1. **Its skill.** Many multiplexers ship a skill for agents. If one among your skills controls the terminal you run in, use it.
-2. **Environment.** Multiplexers mark their panes with variables, usually a session or pane ID. List them with `env | cut -d= -f1 | sort` and look for a tool prefix.
-3. **Process tree.** Walk up from your shell to see what hosts it:
+Run the detector shipped with this skill:
 
-   ```bash
-   pid=$$; while [ "${pid:-1}" -gt 1 ]; do ps -o comm= -p "$pid"; pid=$(ps -o ppid= -p "$pid" | tr -d ' '); done
-   ```
+```bash
+bash assets/detect-multiplexer.sh
+```
 
-Known today, as examples: herdr (`HERDR_ENV=1`, its `herdr` skill), Orca (`ORCA_TERMINAL_HANDLE`, `orca skills get orca-cli`), rex (`REX_BLOCK`, `rex help`), tmux (`TMUX`, `man tmux`). For one you don't know, read `<tool> --help` (or `<tool> help`) and its docs. A bare `<tool>` often opens its UI, so always pass a help flag.
+It checks known environment markers, then the process tree, and prints `multiplexer:`, the matching `marker:`, other `candidates:` that look like pane IDs, and the `ancestors:` chain. Read every line: a `candidates:` or `ancestors:` entry can reveal a multiplexer the script does not know yet.
 
-Find a command for each **capability**: split a new pane beside a given pane with a working directory, run a command in it, send text and Enter, read its output, wait for idle (or poll the output), close it by ID, and know your own pane's ID.
+Then learn its commands, from the first source that exists:
 
-**Done when** every capability has a command. If one is missing, or no multiplexer is found, tell the user in one line and use your agent's own subagent mechanism, or work inline. Everything below still applies.
+1. **Its skill.** Many multiplexers ship one for agents (herdr's `herdr`, Orca's `orca skills get orca-cli`, rex's agent skill).
+2. **Its help.** `<tool> --help` or `<tool> help`. A bare `<tool>` often opens its UI, so always pass a help flag.
+
+Find a command for each **capability**: split a new pane beside a given pane with a working directory, run a command in it, set its title, send text and Enter, read its output, wait for idle (or poll the output), kill its process and close it by ID, list panes, and know your own pane's ID.
+
+When a command fails with a permission or connection error, your sandbox is probably blocking the multiplexer's socket: ask the user to allow it, rather than concluding there is no multiplexer.
+
+When the result is `unknown` with nothing in `candidates:` or `ancestors:`, ask the user once which multiplexer they are in, if any. Use your agent's own subagent mechanism, or work inline, only when they say none or a capability is missing. Everything below still applies.
+
+**Done when** every capability has a command, or the user confirmed there is no multiplexer.
 
 ### 2. Read the delegation settings
 
@@ -100,9 +107,11 @@ Pick a short role **name** (`login-builder`, `security-review`), unique among li
 
 ### 5. Spawn the pane
 
-With the multiplexer's commands: a new pane beside yours, in the current tab and workspace, in your working directory, titled with the role name and leaving focus on your pane where the multiplexer allows it. Start the chosen agent and model in it.
+With the multiplexer's commands: a new pane beside yours, in the current tab and workspace, in your working directory, leaving focus on your pane where the multiplexer allows it. Start the chosen agent and model in it.
 
-**Done when** the agent is ready for input in the new pane, and you have recorded the pane's ID.
+Title the pane with the **agent's name**: `claude`, `codex`, `opencode`, `pi`, ... When several panes run the same agent, add the role: `codex · reviewer`. Set it with the multiplexer's own pane-title or label command, after the agent has started: agents rewrite the terminal title, so a title set before the start gets overwritten.
+
+**Done when** the agent is ready for input in the new pane, the pane shows its title, and you have recorded the pane's ID.
 
 ### 6. Send the brief and wait
 
@@ -122,14 +131,20 @@ On a gap, send a follow-up in English in the **same pane** and go back to step 6
 
 **Done when** all three checks pass.
 
-### 8. Close, fire events, report
+### 8. Kill, fire events, report
 
-Close the pane, then fire the `done` event: run every matching hook ([HOOKS.md](HOOKS.md)). Report to the user in their language: what the subagent did, on which model, what you verified, which hooks fired, and where the results are.
+Once the close gate passed and no hook needs this subagent again, **kill** it so the pane disappears and the UI stays clean:
 
-Keep the pane open instead when the user asked to keep it, and say so.
+1. Quit the agent with its own exit command (`/exit`, `/quit`), or `Ctrl-C` twice.
+2. Close the pane by ID with the multiplexer's close or kill command.
+3. List the panes. If it is still there, kill it with the multiplexer's force option.
 
-**Done when** the pane is closed (or kept on request), every matching hook has run or been started, and the user has the summary.
+Then fire the `done` event: run every matching hook ([HOOKS.md](HOOKS.md)). Report to the user in their language: what the subagent did, on which model, what you verified, which hooks fired, and where the results are.
+
+Keep the pane open instead only when the user asked to keep it, and say so.
+
+**Done when** the pane no longer appears in the multiplexer's pane list (or is kept on request), every matching hook has run or been started, and the user has the summary.
 
 ## Several subagents
 
-One pane, one brief and one model choice per subagent, all spawned before waiting on any. Run steps 6 to 8 for each one separately, closing each pane as soon as its own gate passes. When the last one closes, fire `all-done`.
+One pane, one brief and one model choice per subagent, all spawned before waiting on any. Run steps 6 to 8 for each one separately, killing each pane as soon as its own gate passes. When the last one closes, fire `all-done`.
