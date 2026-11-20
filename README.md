@@ -48,6 +48,11 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 - **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn the corrections of a session into one-line rules in the project's `AGENTS.md`.
 - **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
 
+### [Learning](./skills/learning/README.md)
+
+- **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn the corrections of a session into one-line rules in the project's `AGENTS.md`.
+- **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
+
 ## Writing a new skill
 
 The rules live in [AGENTS.md](./AGENTS.md), read by Codex and most agents. `CLAUDE.md` imports it for Claude Code.
