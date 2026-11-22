@@ -1,13 +1,13 @@
 ---
 name: run-in-pane
-description: Run every long-running process (dev server, Sanity Studio, watcher, tunnel, log tail, docker compose up) in its own visible, titled pane of the current terminal multiplexer instead of in the background. Use before starting any command that keeps running ("npm run dev", "sanity dev", "--watch", "serve", "up", "tail -f"), whether you are the main agent or a subagent. For handing a task to another agent use delegate-to-pane.
+description: Run every long-running process (dev server, Sanity Studio, watcher, tunnel, log tail, docker compose up) in its own visible, titled pane of the current terminal multiplexer instead of in the background. Use before starting any command that keeps running ("npm run dev", "sanity dev", "--watch", "serve", "up", "tail -f"), whether you are the main agent or a subagent. For handing a task to another agent use delegate.
 ---
 
 # Run in a pane
 
 A process that keeps running gets its own **visible** pane, titled with what it is, so the user can watch its output and stop it. Builds, tests and scripts that finish stay in your own shell.
 
-This skill covers processes. Other agents in panes are the job of the `delegate-to-pane` skill.
+This skill covers processes. Handing a task to another agent is a different job: the `delegate` skill.
 
 ## Hard rules
 
@@ -19,7 +19,7 @@ This skill covers processes. Other agents in panes are the job of the `delegate-
 
 ### 1. Find the multiplexer
 
-Run `bash assets/pane.sh list`. It finds its own pane by itself, even when the environment variables are stripped, through the adapter of the tool you run in (`ls assets/adapters`), and keeps a ledger of the panes it opened: with it, steps 2, 3 and 5 are one command each, and you load no other skill (not the tool's own, not `delegate-to-pane`).
+Run `bash assets/pane.sh list`. It finds its own pane by itself, even when the environment variables are stripped, through the adapter of the tool you run in (`ls assets/adapters`), and keeps a ledger of the panes it opened: with it, steps 2, 3 and 5 are one command each, and you load no other skill (not the tool's own, not `delegate`).
 
 Exit code 3 means no adapter knows this tool: write one by following [ADAPTERS.md](ADAPTERS.md) (the tool's own skill or `--help` gives the commands), save it in `$PANE_ADAPTER_DIR` or `assets/adapters/`, and run `pane.sh` again. With no multiplexer at all, or at level `agent`, there is no terminal you can open: run the process with your agent's background option and tell the user the command and where its output goes.
 

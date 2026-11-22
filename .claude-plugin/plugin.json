@@ -9,7 +9,7 @@
   "repository": "https://github.com/LucaArgentieri/skills",
   "skills": [
     "./skills/publishing/ebook-typesetting",
-    "./skills/multiplexers/delegate-to-pane",
+    "./skills/multiplexers/delegate",
     "./skills/multiplexers/run-in-pane",
     "./skills/learning/autolearn",
     "./skills/learning/dreaming"

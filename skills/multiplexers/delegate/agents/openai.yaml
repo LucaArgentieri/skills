@@ -1,3 +1,5 @@
 interface:
-  display_name: "Delegate to Pane"
+  display_name: "Delegate"
   short_description: "Subagent in a visible multiplexer pane"
+policy:
+  allow_implicit_invocation: false

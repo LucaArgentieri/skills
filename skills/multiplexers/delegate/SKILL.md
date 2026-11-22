@@ -1,9 +1,10 @@
 ---
-name: delegate-to-pane
-description: Decide how a spawned subagent is run when you delegate from inside any terminal multiplexer or agent workspace - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when you delegate reasoning work to another agent in a pane, and when the user asks to delegate ("fai fare a un subagent", "delega") or to run agents in parallel. To start one known command or process, use run-in-pane instead.
+name: delegate
+description: Run a subagent in its own visible multiplexer pane with an English brief, a model matched to the task class, event hooks and a close gate on verified completion. Invoke it by name (/delegate) when you want work handed to another agent.
+disable-model-invocation: true
 ---
 
-# Delegate to a pane
+# Delegate
 
 A delegation policy. It decides where a subagent runs, how it is briefed, which model it gets, what happens on its events, and when it may close.
 
@@ -13,7 +14,7 @@ It works with any multiplexer. The pane commands belong to the multiplexer: lear
 
 You are the **parent**, the agent the user talks to. These rules shape only the **spawned chats**; your own chat with the user keeps its language, style and length, and the brief's RULES block never applies to you. A subagent that also has this skill follows its brief and uses the skill only to delegate further.
 
-A **mechanical** task (one known command, no reasoning, no plan to write) needs no brief and no model choice: run it with the `run-in-pane` skill.
+A **mechanical** task (one known command, no reasoning, no plan to write) needs no brief and no model choice: just run it.
 
 ## Hard rules
 
@@ -26,7 +27,7 @@ A **mechanical** task (one known command, no reasoning, no plan to write) needs 
 
 ### 1. Find the multiplexer
 
-Run `bash <run-in-pane skill folder>/assets/pane.sh list`. It finds the pane you run in by itself, through the adapter of the tool you run in, and exits 3 when no adapter knows the tool (then write one: ADAPTERS.md in the `run-in-pane` skill, with the commands from the tool's own skill or `--help`). Its **level** is the most it lets you open:
+Use the commands of the tool you run in: its own skill first, then its `--help`. If the `run-in-pane` skill is installed, its `pane.sh` already opens, reads and closes panes by ID in any tool that has an adapter there (`pane.sh list` finds your pane; exit 3 means no adapter for this tool). Your **level** is the most the tool lets you open:
 
 | Level | What you can open | Use it for |
 | --- | --- | --- |
@@ -97,7 +98,7 @@ Pick a short role **name** (`login-builder`, `security-review`), unique among li
 
 ### 5. Spawn the pane
 
-With `pane.sh` (`open --title <agent> -- <command>` prints and records the pane ID, `close <id>` accepts only recorded IDs) at the highest level the tool reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory and leave focus on your pane. Start the chosen agent and model in it.
+With the tool's commands (or `pane.sh open --title <agent> -- <command>` when the `run-in-pane` skill is installed: it prints and records the pane ID, and `close <id>` accepts only recorded IDs), at the highest level the tool reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory and leave focus on your pane. Start the chosen agent and model in it.
 
 When the tool puts the agent in its own git worktree (compare `git -C <its folder> worktree list` and its branch with yours), its changes live on another branch: put the worktree path and branch in the brief's CONTEXT, run the close gate's checks inside that worktree, and report the branch to the user. Bringing the changes back (merge, cherry-pick) is the user's call, unless the delegation settings say otherwise.
 
