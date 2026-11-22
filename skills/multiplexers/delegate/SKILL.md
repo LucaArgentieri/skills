@@ -1,6 +1,6 @@
 ---
 name: delegate
-description: Run a subagent in its own visible multiplexer pane with an English brief, a model matched to the task class, event hooks and a close gate on verified completion. Invoke it by name (/delegate) when you want work handed to another agent.
+description: Run a subagent in its own visible multiplexer pane with an English brief, a model matched to the task class, event hooks and a close gate on verified completion. Invoke it by name when you want work handed to another agent.
 disable-model-invocation: true
 ---
 
@@ -31,7 +31,7 @@ Use the commands of the tool you run in: its own skill first, then its `--help`.
 
 | Level | What you can open | Use it for |
 | --- | --- | --- |
-| `split` | a pane beside yours, in the same tab | subagents and processes, the default |
+| `split` | a pane beside yours, in the same tab | subagents, the default |
 | `tab` | a new visible terminal, tab or canvas node in the same workspace | the same, when there is no split |
 | `agent` | a new agent session or thread the app shows, with no raw terminal | subagents only |
 | `none` | nothing an agent can drive | your own subagent mechanism, or inline, and say so |
@@ -86,7 +86,7 @@ RULES:
 - Stay inside TASK. Commit, push or delete only if TASK says so.
 - CLASS research or review: change nothing. Report findings with file paths or sources.
 - CLASS execution: follow PLAN as written. If reality does not fit PLAN, stop and report it instead of redesigning.
-- Start long-running processes (dev servers, studios, watchers) in a new visible pane beside yours, titled `<project>: <process>`, never in the background. List them in your reply.
+- Start long-running processes (dev servers, studios, watchers) in a new visible pane beside yours, titled `<project>: <process>`; only when no terminal can be opened, run them in the background and say where the output goes. List them in your reply.
 - If a decision belongs to the user, stop and ask it in your reply.
 - If the result is longer than about 40 lines, write it to <tmp-dir>/<name>-result.md and reply with the path.
 - End every reply with one line: `STATUS: DONE` or `STATUS: BLOCKED <reason>`.
