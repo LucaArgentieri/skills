@@ -100,7 +100,7 @@ Pick a short role **name** (`login-builder`, `security-review`), unique among li
 
 ### 5. Spawn the pane
 
-With the multiplexer's commands, at the highest level it reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory, and leave focus on your pane where the tool allows it. Start the chosen agent and model in it. When the tool puts the agent in its own worktree, follow the worktree notes in [ENVIRONMENTS.md](ENVIRONMENTS.md).
+With the multiplexer's commands, at the highest level it reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory, and leave focus on your pane where the tool allows it. In rex or tmux, the `run-in-pane` skill ships `assets/pane.sh`: `open` prints the pane ID and records it, and `close` accepts only recorded IDs. Start the chosen agent and model in it. When the tool puts the agent in its own worktree, follow the worktree notes in [ENVIRONMENTS.md](ENVIRONMENTS.md).
 
 Title the pane with the **agent's name**: `claude`, `codex`, `opencode`, `pi`, ... When several panes run the same agent, add the role: `codex: reviewer`. Keep titles ASCII: under a non-UTF-8 locale tmux turns other characters into `_`. Set it with the multiplexer's own pane-title or label command, after the agent has started: agents rewrite the terminal title, so a title set before the start gets overwritten.
 
