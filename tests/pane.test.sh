@@ -104,7 +104,7 @@ if command -v tmux >/dev/null 2>&1; then
   first=$(tmux -L "pane-$$" display-message -p -t t '#{pane_id}')
   T() { env TMUX="$tsock,1,0" TMUX_PANE="$first" bash "$PANE" "$@"; }
   # an agent that strips the environment: the script must find its own pane
-  tmux -L "pane-$$" new-window -d -t t -n stripped "env -u TMUX -u TMUX_PANE bash '$PANE' open --title 'found: me' -- sleep 20 > '$work/tmux-stripped.out' 2>&1; sleep 20"
+  tmux -L "pane-$$" new-window -d -t t: -n stripped "env -u TMUX -u TMUX_PANE bash '$PANE' open --title 'found: me' -- sleep 20 > '$work/tmux-stripped.out' 2>&1; sleep 20"
   for _ in $(seq 20); do [ -s "$work/tmux-stripped.out" ] && break; sleep 0.5; done
   case "$(head -n1 "$work/tmux-stripped.out")" in %*) ok "tmux: pane.sh finds its pane without TMUX" ;; *) bad "tmux: pane.sh finds its pane without TMUX (got '$(cat "$work/tmux-stripped.out")')" ;; esac
   tid=$(T open --title "test: tmux" -- sh -c 'echo tmux-ready; sleep 30')
