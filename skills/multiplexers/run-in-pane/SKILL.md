@@ -19,7 +19,7 @@ This skill covers processes. Other agents in panes are the job of the `delegate-
 
 ### 1. Find the multiplexer
 
-Run `bash assets/pane.sh list`. It works in rex and tmux, finds its own pane even when the environment variables are stripped (it matches its process ancestors to a pane), and keeps a ledger of the panes it opened: with it, steps 2, 3 and 5 are one command each, and you load no other skill (not the multiplexer's own, not `delegate-to-pane`). Only exit code 3 means another multiplexer: then use step 1 of the `delegate-to-pane` skill to detect it, and that tool's own skill or `--help` for its commands. You then need: open a pane beside yours (level `split`) or a new terminal in the same workspace (level `tab`) with a working directory, run a command in it, set its title, read its output, list them, and close one.
+Run `bash assets/pane.sh list`. It works in rex, tmux and herdr, finds its own pane even when the environment variables are stripped (it matches its process ancestors to a pane), and keeps a ledger of the panes it opened: with it, steps 2, 3 and 5 are one command each, and you load no other skill (not the multiplexer's own, not `delegate-to-pane`). Only exit code 3 means another multiplexer: then use step 1 of the `delegate-to-pane` skill to detect it, and that tool's own skill or `--help` for its commands. You then need: open a pane beside yours (level `split`) or a new terminal in the same workspace (level `tab`) with a working directory, run a command in it, set its title, read its output, list them, and close one.
 
 At level `agent` or `none`, or with no multiplexer, the tool has no terminal you can open: run the process with your agent's background option and tell the user the command and where its output goes.
 
