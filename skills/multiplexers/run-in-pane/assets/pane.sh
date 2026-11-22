@@ -12,6 +12,8 @@
 #   pane.sh list                             prints the ledger IDs that are still alive
 #
 # Multiplexers: rex and tmux. Anything else exits 3: use that tool's own skill or --help.
+# It finds its own pane: REX_SESSION / TMUX when set, otherwise by matching its process
+# ancestors to a pane's process, so an agent that strips environment variables still works.
 # Ledger: one ID per line in $PANE_LEDGER, default $TMPDIR/pane-ledger-<mux>-<session>.
 # A pane you did not open is never in the ledger, so close refuses it.
 # Test hook: PANE_ADAPTER=/path/to/adapter.sh replaces the built-in multiplexer.
@@ -46,6 +48,58 @@ tmux_read() { tmux capture-pane -p -J -t "$1" -S "-$2"; }
 tmux_alive() { tmux list-panes -a -F '#{pane_id}' | grep -qx "$1"; }
 tmux_close() { tmux kill-pane -t "$1"; }
 
+# --- locate ourselves: match this process's ancestors to a pane's process
+
+ancestors() { # prints "<pid> <pid> ..." from this shell up to init
+  local p=$$ out=
+  while [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null; do out="$out $p"; p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); done
+  echo "$out"
+}
+
+discover_rex() { # exports REX_SESSION and REX_BLOCK of the pane we run in; non-zero if not in a rex pane
+  command -v rex >/dev/null 2>&1 || return 1
+  local found
+  found=$(ANCESTORS="$(ancestors)" python3 -I - <<'PY'
+import json, os, subprocess, sys
+chain = set(os.environ["ANCESTORS"].split())
+def rex(*a):
+    r = subprocess.run(["rex", *a], capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else ""
+try:
+    sessions = [s["session_id"] for s in json.loads(rex("ls", "--json")).get("sessions", [])]
+except ValueError:
+    sys.exit(1)
+for s in sessions:
+    try:
+        blocks = json.loads(rex("block", "ls", "-s", s, "--json")).get("blocks", [])
+    except ValueError:
+        continue
+    for b in blocks:
+        try:
+            proc = json.loads(rex("block", "call", "-s", s, "-b", b["block_id"], "process"))
+        except ValueError:
+            continue
+        pid = (proc.get("child") or {}).get("pid")
+        if pid is not None and str(pid) in chain:
+            print(s, b["block_id"]); sys.exit(0)
+sys.exit(1)
+PY
+  ) || return 1
+  export REX_SESSION=${found% *} REX_BLOCK=${found#* }
+}
+
+discover_tmux() { # exports TMUX and TMUX_PANE of the pane we run in; non-zero if not in a tmux pane
+  command -v tmux >/dev/null 2>&1 || return 1
+  local chain=" $(ancestors) " sock line pid id
+  for sock in "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"/*; do
+    [ -S "$sock" ] || continue
+    while read -r pid id; do
+      case "$chain" in *" $pid "*) export TMUX="$sock,0,0" TMUX_PANE=$id; return 0 ;; esac
+    done < <(tmux -S "$sock" list-panes -a -F '#{pane_pid} #{pane_id}' 2>/dev/null)
+  done
+  return 1
+}
+
 # --- pick the multiplexer
 
 if [ -n "${PANE_ADAPTER:-}" ]; then
@@ -54,7 +108,9 @@ if [ -n "${PANE_ADAPTER:-}" ]; then
 else
   if [ -n "${REX_SESSION:-}" ] && command -v rex >/dev/null 2>&1; then mux=rex
   elif [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then mux=tmux
-  else die "no supported multiplexer (rex, tmux) in this session: use the tool's own skill" 3
+  elif discover_rex; then mux=rex
+  elif discover_tmux; then mux=tmux
+  else die "not inside a rex or tmux pane (checked the environment and the process tree): use the tool's own skill" 3
   fi
   for f in session open read alive close; do eval "mux_$f() { ${mux}_$f \"\$@\"; }"; done
 fi
