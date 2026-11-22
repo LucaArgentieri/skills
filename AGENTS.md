@@ -91,7 +91,7 @@ Skills run in any agent that reads the [Agent Skills](https://agentskills.io) fo
 
 - **Single source of truth.** Each fact lives in one place. `SKILL.md` links to it.
 - **Leave the environment to itself.** Record what can't be looked up (conventions, reasons, gotchas). Versions, flags and `--help` output stay in their tools.
-- **Tools keep their own skills.** When a tool ships its own skill or CLI guide (herdr, Orca, rex, ...), point to it. Never copy, override or rewrite its commands and rules here.
+- **Tools keep their own skills.** When a tool ships its own skill or CLI guide (a multiplexer, an agent workspace, ...), point to it. Never copy, override or rewrite its commands and rules here.
 - **Cut no-ops.** A sentence the model would obey anyway is noise. Delete the whole sentence.
 - **Cut stale lines** whenever behaviour changes. Removing is safer than letting sediment build up.
 
