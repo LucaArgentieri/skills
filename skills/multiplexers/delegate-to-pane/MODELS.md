@@ -35,13 +35,13 @@ Model names change often. Placeholders in `<angle brackets>` stand for whatever 
 ```markdown
 ## Delegation
 
-- research: opencode --model <provider>/<free-model>
+- research: opencode run --model <provider>/<free-model>
 - reasoning: same as mine
-- execution: opencode --model <provider>/<open-weight-model>
-- review: opencode --model <provider>/<top-model>
+- execution: opencode run --model <provider>/<open-weight-model>
+- review: opencode run --model <provider>/<top-model>
 ```
 
-`--model` takes `provider/model`, as listed by `opencode models`. It belongs to `opencode run` (headless): the interactive `opencode` command may reject it, so in a pane start `opencode` and pick the model there, or check `opencode --help` first. Free trial models suit research; an open-weight coder (DeepSeek, Qwen, Kimi, ...) suits execution.
+`--model` takes `provider/model`, as listed by `opencode models`. It is a flag of `opencode run` (headless, the brief goes in as the message); the interactive `opencode` command has none, so there you pick the model inside the TUI. Free trial models suit research; an open-weight coder (DeepSeek, Qwen, Kimi, ...) suits execution.
 
 ## Mix with pi
 
@@ -50,7 +50,7 @@ One agent per class, each where it is strongest or cheapest:
 ```markdown
 ## Delegation
 
-- research: opencode --model <provider>/<free-model>
+- research: opencode run --model <provider>/<free-model>
 - reasoning: same as mine (Claude Code, Opus)
 - execution: pi --model <provider>/<open-weight-model>:low
 - review: codex --model <top-model>
