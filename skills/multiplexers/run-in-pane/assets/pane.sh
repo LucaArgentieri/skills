@@ -2,10 +2,12 @@
 # pane.sh: open, read, wait on and close panes, closing only panes this script opened.
 #
 # Usage:
-#   pane.sh open --title TITLE [--cwd DIR] [--dir right|below] -- COMMAND [ARGS...]   prints the pane ID
+#   pane.sh open --title TITLE [--cwd DIR] [--dir right|below] [--wait REGEX [--timeout SECS]] -- COMMAND [ARGS...]
+#                                            prints the pane ID; with --wait, also the last output lines once
+#                                            REGEX matches (exit 1 on timeout, the pane stays open and owned)
 #   pane.sh read ID [LINES]                  prints the last LINES (default 60) lines of the pane
 #   pane.sh wait ID REGEX [SECONDS]          exit 0 when the output matches, 1 on timeout (default 60)
-#   pane.sh close ID                         closes a pane from the ledger, refuses any other ID (exit 4)
+#   pane.sh close ID|--all                   closes a pane from the ledger (--all: every one), refuses any other ID (exit 4)
 #   pane.sh list                             prints the ledger IDs that are still alive
 #
 # Multiplexers: rex and tmux. Anything else exits 3: use that tool's own skill or --help.
@@ -64,12 +66,14 @@ owned() { grep -qxF "$1" "$ledger"; }
 cmd=${1:-}; [ $# -gt 0 ] && shift
 case "$cmd" in
   open)
-    title=; cwd=$PWD; dir=right
+    title=; cwd=$PWD; dir=right; waitre=; timeout=90
     while [ $# -gt 0 ]; do
       case "$1" in
         --title) title=${2:?--title needs a value}; shift 2 ;;
         --cwd) cwd=${2:?--cwd needs a value}; shift 2 ;;
         --dir) dir=${2:?--dir needs right or below}; shift 2 ;;
+        --wait) waitre=${2:?--wait needs a REGEX}; shift 2 ;;
+        --timeout) timeout=${2:?--timeout needs seconds}; shift 2 ;;
         --) shift; break ;;
         *) die "open: unknown option $1" 2 ;;
       esac
@@ -81,6 +85,10 @@ case "$cmd" in
     [ -n "$id" ] || die "open returned no pane ID"
     echo "$id" >> "$ledger"
     echo "$id"
+    if [ -n "$waitre" ]; then
+      "$0" wait "$id" "$waitre" "$timeout" || die "open: no match for '$waitre' within ${timeout}s (pane $id stays open)"
+      mux_read "$id" 20
+    fi
     ;;
   read)
     id=${1:?read needs a pane ID}; mux_read "$id" "${2:-60}" ;;
@@ -94,7 +102,11 @@ case "$cmd" in
     exit 1
     ;;
   close)
-    id=${1:?close needs a pane ID}
+    id=${1:?close needs a pane ID or --all}
+    if [ "$id" = --all ]; then
+      while IFS= read -r each; do [ -n "$each" ] && { "$0" close "$each" || exit 1; }; done < <(cat "$ledger")
+      exit 0
+    fi
     owned "$id" || die "refusing to close $id: this script did not open it" 4
     mux_close "$id" || die "close failed for $id"
     grep -vxF "$id" "$ledger" > "$ledger.tmp" || true; mv "$ledger.tmp" "$ledger"
