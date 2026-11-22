@@ -104,6 +104,7 @@ Skills run in any agent that reads the [Agent Skills](https://agentskills.io) fo
 5. `agents/openai.yaml` exists, and its invocation policy matches the frontmatter.
 6. Every relative link in the skill resolves.
 7. A grep for harness-specific names (`Claude`, `AskUserQuestion`, `WebFetch`, `Task(`, `CLAUDE_`) in the skill folder comes back empty, or each hit is justified.
+8. `bash tests/run.sh` passes. It checks points 1 to 7 automatically and runs the multiplexer tests. Add a test when a skill ships a script.
 
 ## Style
 
