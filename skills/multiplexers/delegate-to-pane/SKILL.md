@@ -26,23 +26,20 @@ A **mechanical** task (one known command, no reasoning, no plan to write) needs 
 
 ### 1. Find the multiplexer
 
-When the session context already names the multiplexer and its list command answers, skip the detector. Otherwise run the one shipped with this skill:
+Run `bash <run-in-pane skill folder>/assets/pane.sh list`. It finds the pane you run in by itself, through the adapter of the tool you run in, and exits 3 when no adapter knows the tool (then write one: ADAPTERS.md in the `run-in-pane` skill, with the commands from the tool's own skill or `--help`). Its **level** is the most it lets you open:
 
-```bash
-bash assets/detect-multiplexer.sh
-```
+| Level | What you can open | Use it for |
+| --- | --- | --- |
+| `split` | a pane beside yours, in the same tab | subagents and processes, the default |
+| `tab` | a new visible terminal, tab or canvas node in the same workspace | the same, when there is no split |
+| `agent` | a new agent session or thread the app shows, with no raw terminal | subagents only |
+| `none` | nothing an agent can drive | your own subagent mechanism, or inline, and say so |
 
-It checks the markers of over 20 multiplexers and agent workspaces, then the process tree. Read every line: `candidates:` and `ancestors:` can reveal a tool the script does not know yet.
+Use the highest level the tool reaches. When the tool's own skill sets rules (for example "message agents with its agent command, not raw input"), follow them.
 
-Then read [ENVIRONMENTS.md](ENVIRONMENTS.md) for where its commands come from (its own skill first, then its help), its **level** (`split`, `tab`, `agent` or `none`), and whether it isolates agents in git worktrees. For a tool not listed there, read `<tool> --help`: a bare `<tool>` often opens its UI.
+When a command fails with a permission or connection error, your sandbox is probably blocking the tool's socket: ask the user to allow it, rather than concluding there is no multiplexer. When nothing identifies the tool, ask the user once which one they are in, if any; at level `none`, or when the user says there is none, use your agent's own subagent mechanism, or work inline, and say so. Everything below still applies.
 
-Find a command for each **capability** your level allows: open a pane (or tab, or agent session) with a working directory, run a command in it, set its title, send text and Enter, read its output, wait for idle (or poll the output), kill and close it by ID, list them, and know your own ID.
-
-When a command fails with a permission or connection error, your sandbox is probably blocking the multiplexer's socket: ask the user to allow it, rather than concluding there is no multiplexer.
-
-When the result is `unknown` with nothing in `candidates:` or `ancestors:`, ask the user once which multiplexer they are in, if any. At level `none`, or when the user says there is none, use your agent's own subagent mechanism, or work inline, and say so. Everything below still applies.
-
-**Done when** you know the level and have a command for every capability it allows, or the user confirmed there is no multiplexer.
+**Done when** you know the level and have a command for every step 5 to 8 needs (open, run, title, send text, read, wait, close by ID, list), or the user confirmed there is no multiplexer.
 
 ### 2. Read the delegation settings
 
@@ -100,7 +97,9 @@ Pick a short role **name** (`login-builder`, `security-review`), unique among li
 
 ### 5. Spawn the pane
 
-With the multiplexer's commands, at the highest level it reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory, and leave focus on your pane where the tool allows it. In rex or tmux, the `run-in-pane` skill ships `assets/pane.sh`: `open` prints the pane ID and records it, and `close` accepts only recorded IDs. Start the chosen agent and model in it. When the tool puts the agent in its own worktree, follow the worktree notes in [ENVIRONMENTS.md](ENVIRONMENTS.md).
+With `pane.sh` (`open --title <agent> -- <command>` prints and records the pane ID, `close <id>` accepts only recorded IDs) at the highest level the tool reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory and leave focus on your pane. Start the chosen agent and model in it.
+
+When the tool puts the agent in its own git worktree (compare `git -C <its folder> worktree list` and its branch with yours), its changes live on another branch: put the worktree path and branch in the brief's CONTEXT, run the close gate's checks inside that worktree, and report the branch to the user. Bringing the changes back (merge, cherry-pick) is the user's call, unless the delegation settings say otherwise.
 
 Title the pane with the **agent's name**: `claude`, `codex`, `opencode`, `pi`, ... When several panes run the same agent, add the role: `codex: reviewer`. Keep titles ASCII: under a non-UTF-8 locale tmux turns other characters into `_`. Set it with the multiplexer's own pane-title or label command, after the agent has started: agents rewrite the terminal title, so a title set before the start gets overwritten.
 
