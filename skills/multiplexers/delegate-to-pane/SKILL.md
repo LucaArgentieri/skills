@@ -32,20 +32,17 @@ Run the detector shipped with this skill:
 bash assets/detect-multiplexer.sh
 ```
 
-It checks known environment markers, then the process tree, and prints `multiplexer:`, the matching `marker:`, other `candidates:` that look like pane IDs, and the `ancestors:` chain. Read every line: a `candidates:` or `ancestors:` entry can reveal a multiplexer the script does not know yet.
+It checks the markers of over 20 multiplexers and agent workspaces (herdr, Orca, rex, cmux, Muxy, Superset, Pane, Paseo, NodeTerm, Craig, Sidecar, amux, dmux, Claude Squad, Cyclops, Conductor, T3 Code, zellij, tmux, ...), then the process tree. Read every line: `candidates:` and `ancestors:` can reveal a tool the script does not know yet.
 
-Then learn its commands, from the first source that exists:
+Then read [ENVIRONMENTS.md](ENVIRONMENTS.md) for where its commands come from (its own skill first, then its help), its **level** (`split`, `tab`, `agent` or `none`), and whether it isolates agents in git worktrees. For a tool not listed there, read `<tool> --help`: a bare `<tool>` often opens its UI.
 
-1. **Its skill.** Many multiplexers ship one for agents (herdr's `herdr`, Orca's `orca skills get orca-cli`, rex's agent skill).
-2. **Its help.** `<tool> --help` or `<tool> help`. A bare `<tool>` often opens its UI, so always pass a help flag.
-
-Find a command for each **capability**: split a new pane beside a given pane with a working directory, run a command in it, set its title, send text and Enter, read its output, wait for idle (or poll the output), kill its process and close it by ID, list panes, and know your own pane's ID.
+Find a command for each **capability** your level allows: open a pane (or tab, or agent session) with a working directory, run a command in it, set its title, send text and Enter, read its output, wait for idle (or poll the output), kill and close it by ID, list them, and know your own ID.
 
 When a command fails with a permission or connection error, your sandbox is probably blocking the multiplexer's socket: ask the user to allow it, rather than concluding there is no multiplexer.
 
-When the result is `unknown` with nothing in `candidates:` or `ancestors:`, ask the user once which multiplexer they are in, if any. Use your agent's own subagent mechanism, or work inline, only when they say none or a capability is missing. Everything below still applies.
+When the result is `unknown` with nothing in `candidates:` or `ancestors:`, ask the user once which multiplexer they are in, if any. At level `none`, or when the user says there is none, use your agent's own subagent mechanism, or work inline, and say so. Everything below still applies.
 
-**Done when** every capability has a command, or the user confirmed there is no multiplexer.
+**Done when** you know the level and have a command for every capability it allows, or the user confirmed there is no multiplexer.
 
 ### 2. Read the delegation settings
 
@@ -108,7 +105,7 @@ Pick a short role **name** (`login-builder`, `security-review`), unique among li
 
 ### 5. Spawn the pane
 
-With the multiplexer's commands: a new pane beside yours, in the current tab and workspace, in your working directory, leaving focus on your pane where the multiplexer allows it. Start the chosen agent and model in it.
+With the multiplexer's commands, at the highest level it reaches: a pane beside yours (`split`), a new terminal or tab in the same workspace (`tab`), or a new agent session the app shows (`agent`). Use your working directory, and leave focus on your pane where the tool allows it. Start the chosen agent and model in it. When the tool puts the agent in its own worktree, follow the worktree notes in [ENVIRONMENTS.md](ENVIRONMENTS.md).
 
 Title the pane with the **agent's name**: `claude`, `codex`, `opencode`, `pi`, ... When several panes run the same agent, add the role: `codex · reviewer`. Set it with the multiplexer's own pane-title or label command, after the agent has started: agents rewrite the terminal title, so a title set before the start gets overwritten.
 

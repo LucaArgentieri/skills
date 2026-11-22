@@ -25,9 +25,9 @@ Builds, tests and scripts that finish stay in your own shell.
 
 ### 1. Find the multiplexer
 
-Use step 1 of the `delegate-to-pane` skill: it detects the multiplexer and its commands. Here you need: split a pane beside yours with a working directory, run a command in it, set its title, read its output, list panes, and close a pane.
+Use step 1 of the `delegate-to-pane` skill: it detects the multiplexer, its commands and its level. Here you need: open a pane beside yours (level `split`) or a new terminal in the same workspace (level `tab`) with a working directory, run a command in it, set its title, read its output, list them, and close one.
 
-When there is no multiplexer, run the process with your agent's background option and tell the user the command and where its output goes.
+At level `agent` or `none`, or with no multiplexer, the tool has no terminal you can open: run the process with your agent's background option and tell the user the command and where its output goes.
 
 **Done when** you have those commands, or the user knows the process runs in the background and why.
 
@@ -35,7 +35,7 @@ When there is no multiplexer, run the process with your agent's background optio
 
 List the panes. When one already runs the same command in the same folder, use it and stop here.
 
-Otherwise open a new pane beside yours, in the project folder, leaving focus on your pane where the multiplexer allows it. Title it `<project> · <process>`: `web · dev`, `sanity · studio`, `api · docker`. Run the command in it as a plain foreground command.
+Otherwise open a new pane beside yours (or a new terminal, at level `tab`), in the project folder, leaving focus on your pane where the multiplexer allows it. Title it `<project> · <process>`: `web · dev`, `sanity · studio`, `api · docker`. Run the command in it as a plain foreground command.
 
 **Done when** exactly one pane runs the process, and it shows its title.
 
