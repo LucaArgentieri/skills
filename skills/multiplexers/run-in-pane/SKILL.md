@@ -35,7 +35,7 @@ At level `agent` or `none`, or with no multiplexer, the tool has no terminal you
 
 List the panes. When one already runs the same command in the same folder, use it and stop here.
 
-Otherwise open a new pane beside yours (or a new terminal, at level `tab`), in the project folder, leaving focus on your pane where the multiplexer allows it. Title it `<project> · <process>`: `web · dev`, `sanity · studio`, `api · docker`. Run the command in it as a plain foreground command.
+Otherwise open a new pane beside yours (or a new terminal, at level `tab`), in the project folder, leaving focus on your pane where the multiplexer allows it. Title it `<project>: <process>`: `web: dev`, `sanity: studio`, `api: docker`. Run the command in it as a plain foreground command.
 
 **Done when** exactly one pane runs the process, and it shows its title.
 

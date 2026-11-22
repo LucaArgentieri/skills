@@ -48,6 +48,18 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 - **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn the corrections of a session into one-line rules in the project's `AGENTS.md`.
 - **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
 
+## Tests
+
+```bash
+bash tests/run.sh
+```
+
+- `tests/lint-skills.py` checks every skill against the checklist in `AGENTS.md`: name, description, READMEs, plugin manifest, Codex metadata, links, harness-specific names.
+- `tests/detect-multiplexer.test.sh` checks the multiplexer detector against every known marker, and on a real tmux server.
+- `tests/tmux-e2e.test.sh` runs the pane flows of `delegate-to-pane` and `run-in-pane` on a real tmux server, with a fake agent and a local dev server.
+
+They also run on every push and pull request.
+
 ## Writing a new skill
 
 The rules live in [AGENTS.md](./AGENTS.md), read by Codex and most agents. `CLAUDE.md` imports it for Claude Code.
