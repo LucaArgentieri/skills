@@ -49,6 +49,15 @@ check "close refuses an ID twice" refused bash "$PANE" close "$id"
 check "wait times out on no match" bash -c "! bash '$PANE' wait user-pane nomatch 2"
 check "open without --title fails" bash -c "! bash '$PANE' open -- echo x"
 check "open without a command fails" bash -c "! bash '$PANE' open --title t"
+
+w=$(bash "$PANE" open --title "w" --cwd "$work" --wait 'ready-now' --timeout 5 -- sh -c 'echo ready-now')
+case "$w" in *ready-now*) ok "open --wait returns the ID and the output" ;; *) bad "open --wait returns the ID and the output (got '$w')" ;; esac
+bash "$PANE" open --title "slow" --cwd "$work" --wait 'never-printed' --timeout 2 -- sleep 5 >/dev/null 2>&1
+[ $? -eq 1 ] && ok "open --wait times out with exit 1" || bad "open --wait times out with exit 1"
+check "a timed-out pane stays owned" bash -c "[ \$(bash '$PANE' list | wc -l) -ge 2 ]"
+check "close --all closes every owned pane" bash "$PANE" close --all
+check "close --all leaves none owned" bash -c "[ -z \"\$(bash '$PANE' list)\" ]"
+check "close --all leaves the user pane alone" test -f "$PANE_MOCK_DIR/user-pane"
 unset PANE_ADAPTER
 
 # --- unsupported multiplexer exits 3
