@@ -7,7 +7,8 @@
 #                                            REGEX matches (exit 1 on timeout, the pane stays open and owned)
 #   pane.sh read ID [LINES]                  prints the last LINES (default 60) lines of the pane
 #   pane.sh wait ID REGEX [SECONDS]          exit 0 when the output matches, 1 on timeout (default 60)
-#   pane.sh close ID|--all                   closes a pane from the ledger (--all: every one), refuses any other ID (exit 4)
+#   pane.sh close ID|--all                   closes a pane from the ledger (--all: every one) and ends its process,
+#                                            refuses any other ID (exit 4)
 #   pane.sh list                             prints the ledger IDs that are still alive
 #
 # Multiplexers: rex and tmux. Anything else exits 3: use that tool's own skill or --help.

@@ -54,7 +54,7 @@ One line, in their language: what runs, in which pane, and its URL.
 ### 5. When the work ends
 
 - **Dev servers and studios** stay up: the user will want to look at the result. List them in your final summary.
-- **Helpers** you started only for your own check (a watcher for one test, a tunnel, a log tail) get stopped (`Ctrl-C`) and their pane closed with `bash assets/pane.sh close <id>` (or `close --all` for every pane you opened) as soon as you no longer need them.
+- **Helpers** you started only for your own check (a watcher for one test, a tunnel, a log tail) get stopped and closed as soon as you no longer need them: `bash assets/pane.sh close <id>` (or `close --all` for every pane you opened) ends the process with its pane, so send no keys first.
 
 Stop a dev server earlier only when the user asks, or when it blocks something (a port, a rebuild).
 
