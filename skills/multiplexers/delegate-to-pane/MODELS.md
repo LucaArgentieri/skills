@@ -41,7 +41,7 @@ Model names change often. Placeholders in `<angle brackets>` stand for whatever 
 - review: opencode --model <provider>/<top-model>
 ```
 
-`--model` takes `provider/model`, as listed by `opencode models`. Free trial models suit research; an open-weight coder (DeepSeek, Qwen, Kimi, ...) suits execution.
+`--model` takes `provider/model`, as listed by `opencode models`. It belongs to `opencode run` (headless): the interactive `opencode` command may reject it, so in a pane start `opencode` and pick the model there, or check `opencode --help` first. Free trial models suit research; an open-weight coder (DeepSeek, Qwen, Kimi, ...) suits execution.
 
 ## Mix with pi
 
