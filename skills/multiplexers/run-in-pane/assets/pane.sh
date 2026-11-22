@@ -11,109 +11,61 @@
 #                                            refuses any other ID (exit 4)
 #   pane.sh list                             prints the ledger IDs that are still alive
 #
-# Multiplexers: rex and tmux. Anything else exits 3: use that tool's own skill or --help.
-# It finds its own pane: REX_SESSION / TMUX when set, otherwise by matching its process
-# ancestors to a pane's process, so an agent that strips environment variables still works.
-# Ledger: one ID per line in $PANE_LEDGER, default $TMPDIR/pane-ledger-<mux>-<session>.
+# The script knows no terminal tool by name. Each tool is an adapter file in adapters/ (ADAPTERS.md
+# is the contract and how to write one), also read from $PANE_ADAPTER_DIR first. It picks the adapter
+# whose marker says we run in one of its panes, else the one that finds our pane by matching our
+# process ancestors to its panes (so an agent that strips environment variables still works).
+# No adapter matches: exit 3, write one (ADAPTERS.md) or use the tool's own skill or --help.
+# Ledger: one ID per line in $PANE_LEDGER, default $TMPDIR/pane-ledger-<adapter>-<session>.
 # A pane you did not open is never in the ledger, so close refuses it.
-# Test hook: PANE_ADAPTER=/path/to/adapter.sh replaces the built-in multiplexer.
-# Needs: bash, python3 (rex only: reads the JSON the create command prints).
+# PANE_ADAPTER=/path/to/adapter.sh forces one adapter (tests, or a tool you choose by hand).
+# Needs: bash, python3 (adapters may use it to read JSON).
 set -u
 
 die() { echo "pane.sh: $1" >&2; exit "${2:-1}"; }
 
-# --- adapters: mux_session, mux_open TITLE CWD DIR CMD..., mux_read ID LINES, mux_alive ID, mux_close ID
+here=$(cd "$(dirname "$0")" && pwd)
 
-rex_session() { echo "${REX_SESSION:-}"; }
-rex_open() {
-  local title=$1 cwd=$2 dir=$3; shift 3
-  rex split -s "$REX_SESSION" ${REX_BLOCK:+-b "$REX_BLOCK"} --split="$dir" --focus=false \
-    --label "$title" -c "$cwd" --json -- "$@" \
-    | python3 -I -c 'import json,sys; print(json.load(sys.stdin)["block_ids"][0])'
+adapter_files() { # user adapters first, then the bundled ones
+  local d f
+  for d in ${PANE_ADAPTER_DIR:-} "$here/adapters"; do
+    for f in "$d"/*.sh; do [ -f "$f" ] && echo "$f"; done
+  done
 }
-rex_read() { rex capture -s "$REX_SESSION" -b "$1" --trim | tail -n "$2"; }
-rex_alive() { rex block ls -s "$REX_SESSION" --json | grep -q "\"block_id\": \"$1\""; }
-rex_close() { rex block close -s "$REX_SESSION" "$1" >/dev/null; }
 
-tmux_session() { tmux display-message -p '#{socket_path}:#{session_id}'; }
-tmux_open() {
-  local title=$1 cwd=$2 dir=$3 flag=-h id cmd; shift 3
-  [ "$dir" = below ] && flag=-v
-  cmd=$(printf '%q ' "$@")
-  id=$(tmux split-window -d -P -F '#{pane_id}' "$flag" -c "$cwd" "$cmd") || return 1
-  tmux select-pane -t "$id" -T "$title"
-  echo "$id"
-}
-tmux_read() { tmux capture-pane -p -J -t "$1" -S "-$2"; }
-tmux_alive() { tmux list-panes -a -F '#{pane_id}' | grep -qx "$1"; }
-tmux_close() { tmux kill-pane -t "$1"; }
+try() { local f=$1; shift; ( . "$f"; "$@" ); } # run one adapter function in a subshell, so adapters never mix
 
-# --- locate ourselves: match this process's ancestors to a pane's process
-
-ancestors() { # prints "<pid> <pid> ..." from this shell up to init
+ancestors() { # "<pid> <pid> ..." from this shell up to init
   local p=$$ out=
   while [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null; do out="$out $p"; p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); done
   echo "$out"
 }
 
-discover_rex() { # exports REX_SESSION and REX_BLOCK of the pane we run in; non-zero if not in a rex pane
-  command -v rex >/dev/null 2>&1 || return 1
-  local found
-  found=$(ANCESTORS="$(ancestors)" python3 -I - <<'PY'
-import json, os, subprocess, sys
-chain = set(os.environ["ANCESTORS"].split())
-def rex(*a):
-    r = subprocess.run(["rex", *a], capture_output=True, text=True)
-    return r.stdout if r.returncode == 0 else ""
-try:
-    sessions = [s["session_id"] for s in json.loads(rex("ls", "--json")).get("sessions", [])]
-except ValueError:
-    sys.exit(1)
-for s in sessions:
-    try:
-        blocks = json.loads(rex("block", "ls", "-s", s, "--json")).get("blocks", [])
-    except ValueError:
-        continue
-    for b in blocks:
-        try:
-            proc = json.loads(rex("block", "call", "-s", s, "-b", b["block_id"], "process"))
-        except ValueError:
-            continue
-        pid = (proc.get("child") or {}).get("pid")
-        if pid is not None and str(pid) in chain:
-            print(s, b["block_id"]); sys.exit(0)
-sys.exit(1)
-PY
-  ) || return 1
-  export REX_SESSION=${found% *} REX_BLOCK=${found#* }
-}
-
-discover_tmux() { # exports TMUX and TMUX_PANE of the pane we run in; non-zero if not in a tmux pane
-  command -v tmux >/dev/null 2>&1 || return 1
-  local chain=" $(ancestors) " sock line pid id
-  for sock in "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"/*; do
-    [ -S "$sock" ] || continue
-    while read -r pid id; do
-      case "$chain" in *" $pid "*) export TMUX="$sock,0,0" TMUX_PANE=$id; return 0 ;; esac
-    done < <(tmux -S "$sock" list-panes -a -F '#{pane_pid} #{pane_id}' 2>/dev/null)
-  done
+pick_adapter() { # sets adapter; exports what a locating adapter reports
+  local f out line chain
+  if [ -n "${PANE_ADAPTER:-}" ]; then adapter=$PANE_ADAPTER; return 0; fi
+  while IFS= read -r f; do
+    try "$f" pane_available >/dev/null 2>&1 && try "$f" pane_marker >/dev/null 2>&1 && { adapter=$f; return 0; }
+  done < <(adapter_files)
+  chain=$(ancestors)
+  while IFS= read -r f; do
+    try "$f" pane_available >/dev/null 2>&1 || continue
+    out=$(try "$f" pane_locate "$chain" 2>/dev/null) || continue
+    while IFS= read -r line; do
+      case "$line" in [A-Za-z_]*=*) export "$line" ;; esac
+    done <<< "$out"
+    adapter=$f; return 0
+  done < <(adapter_files)
   return 1
 }
 
-# --- pick the multiplexer
-
-if [ -n "${PANE_ADAPTER:-}" ]; then
-  # shellcheck disable=SC1090
-  . "$PANE_ADAPTER"; mux=custom
-else
-  if [ -n "${REX_SESSION:-}" ] && command -v rex >/dev/null 2>&1; then mux=rex
-  elif [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then mux=tmux
-  elif discover_rex; then mux=rex
-  elif discover_tmux; then mux=tmux
-  else die "not inside a rex or tmux pane (checked the environment and the process tree): use the tool's own skill" 3
-  fi
-  for f in session open read alive close; do eval "mux_$f() { ${mux}_$f \"\$@\"; }"; done
-fi
+pick_adapter || die "not inside a pane of any known tool (adapters: $(adapter_files | xargs -n1 basename 2>/dev/null | sed 's/\.sh$//' | paste -sd, -); checked the environment and the process tree): write an adapter (ADAPTERS.md) or use the tool's own skill" 3
+mux=$(basename "$adapter" .sh)
+mux_session() { try "$adapter" pane_session; }
+mux_open() { try "$adapter" pane_open "$@"; }
+mux_read() { try "$adapter" pane_read "$@"; }
+mux_alive() { try "$adapter" pane_alive "$@"; }
+mux_close() { try "$adapter" pane_close "$@"; }
 
 session=$(mux_session | tr -c 'A-Za-z0-9\n' '_')
 ledger=${PANE_LEDGER:-${TMPDIR:-/tmp}/pane-ledger-$mux-$session}

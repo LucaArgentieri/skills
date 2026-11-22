@@ -19,11 +19,11 @@ This skill covers processes. Other agents in panes are the job of the `delegate-
 
 ### 1. Find the multiplexer
 
-Run `bash assets/pane.sh list`. It works in rex and tmux, finds its own pane even when the environment variables are stripped (it matches its process ancestors to a pane), and keeps a ledger of the panes it opened: with it, steps 2, 3 and 5 are one command each, and you load no other skill (not the multiplexer's own, not `delegate-to-pane`). Only exit code 3 means another multiplexer: then use step 1 of the `delegate-to-pane` skill to detect it, and that tool's own skill or `--help` for its commands. You then need: open a pane beside yours (level `split`) or a new terminal in the same workspace (level `tab`) with a working directory, run a command in it, set its title, read its output, list them, and close one.
+Run `bash assets/pane.sh list`. It finds its own pane by itself, even when the environment variables are stripped, through the adapter of the tool you run in (`ls assets/adapters`), and keeps a ledger of the panes it opened: with it, steps 2, 3 and 5 are one command each, and you load no other skill (not the tool's own, not `delegate-to-pane`).
 
-At level `agent` or `none`, or with no multiplexer, the tool has no terminal you can open: run the process with your agent's background option and tell the user the command and where its output goes.
+Exit code 3 means no adapter knows this tool: write one by following [ADAPTERS.md](ADAPTERS.md) (the tool's own skill or `--help` gives the commands), save it in `$PANE_ADAPTER_DIR` or `assets/adapters/`, and run `pane.sh` again. With no multiplexer at all, or at level `agent`, there is no terminal you can open: run the process with your agent's background option and tell the user the command and where its output goes.
 
-**Done when** you have those commands, or the user knows the process runs in the background and why.
+**Done when** `pane.sh list` runs, or the user knows the process runs in the background and why.
 
 ### 2. Reuse or spawn
 

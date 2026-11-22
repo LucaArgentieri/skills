@@ -1,6 +1,6 @@
 ---
 name: delegate-to-pane
-description: Decide how a spawned subagent is run when you delegate from inside any terminal multiplexer (herdr, Orca, rex, tmux, ...) - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when you delegate reasoning work to another agent in a pane, and when the user asks to delegate ("fai fare a un subagent", "delega") or to run agents in parallel. To start one known command or process, use run-in-pane instead.
+description: Decide how a spawned subagent is run when you delegate from inside any terminal multiplexer or agent workspace - its own visible pane in your workspace, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks that trigger follow-up skills or subagents, and a close gate on verified completion. Use when you delegate reasoning work to another agent in a pane, and when the user asks to delegate ("fai fare a un subagent", "delega") or to run agents in parallel. To start one known command or process, use run-in-pane instead.
 ---
 
 # Delegate to a pane

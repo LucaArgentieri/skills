@@ -19,16 +19,16 @@ refused() { "$@" >/dev/null 2>&1; [ $? -eq 4 ]; }
 
 # --- fake adapter: panes are files in $PANE_MOCK_DIR, "running" a command writes its output there
 cat > "$work/mock.sh" <<'EOF'
-mux_session() { echo mock; }
-mux_open() { # title cwd dir cmd...
+pane_session() { echo mock; }
+pane_open() { # title cwd dir cmd...
   local n; n=$(( $(ls "$PANE_MOCK_DIR" | wc -l) + 1 ))
   : > "$PANE_MOCK_DIR/m$n"
   ( cd "$2" && shift 3 && "$@" > "$PANE_MOCK_DIR/m$n" 2>&1 ) &
   echo "m$n"
 }
-mux_read() { tail -n "$2" "$PANE_MOCK_DIR/$1"; }
-mux_alive() { [ -f "$PANE_MOCK_DIR/$1" ]; }
-mux_close() { rm -f "$PANE_MOCK_DIR/$1"; }
+pane_read() { tail -n "$2" "$PANE_MOCK_DIR/$1"; }
+pane_alive() { [ -f "$PANE_MOCK_DIR/$1" ]; }
+pane_close() { rm -f "$PANE_MOCK_DIR/$1"; }
 EOF
 export PANE_ADAPTER="$work/mock.sh" PANE_MOCK_DIR="$work/panes" PANE_LEDGER="$work/ledger"
 mkdir "$PANE_MOCK_DIR"
@@ -60,11 +60,28 @@ check "close --all leaves none owned" bash -c "[ -z \"\$(bash '$PANE' list)\" ]"
 check "close --all leaves the user pane alone" test -f "$PANE_MOCK_DIR/user-pane"
 unset PANE_ADAPTER
 
+# --- a new tool is one file in a user adapter folder, picked with no change to pane.sh
+mkdir "$work/user-adapters"
+cat > "$work/user-adapters/newtool.sh" <<'EOF2'
+pane_available() { return 0; }
+pane_marker() { [ -n "${NEWTOOL_PANE:-}" ]; }
+pane_locate() { return 1; }
+pane_session() { echo newtool; }
+pane_open() { echo "nt-$$"; }
+pane_read() { echo "newtool output"; }
+pane_alive() { return 0; }
+pane_close() { return 0; }
+EOF2
+nid=$(NEWTOOL_PANE=1 PANE_ADAPTER_DIR="$work/user-adapters" PANE_LEDGER="$work/nt-ledger" bash "$PANE" open --title t -- true)
+case "$nid" in nt-*) ok "a user adapter is picked by its marker" ;; *) bad "a user adapter is picked by its marker (got '$nid')" ;; esac
+check "a user adapter's pane is closable by its ID" env NEWTOOL_PANE=1 PANE_ADAPTER_DIR="$work/user-adapters" PANE_LEDGER="$work/nt-ledger" bash "$PANE" close "$nid"
+
 # --- unsupported multiplexer exits 3
 # Orphaned on purpose: reparented to init, its ancestors hold no pane, even when this test runs inside one.
-env -u REX_SESSION -u REX_BLOCK -u TMUX -u TMUX_PANE bash -c "(sleep 1; bash '$PANE' list >/dev/null 2>&1; echo \$? > '$work/exit3') &"
+env -u REX_SESSION -u REX_BLOCK -u TMUX -u TMUX_PANE bash -c "(sleep 1; bash '$PANE' list >/dev/null 2>'$work/exit3.err'; echo \$? > '$work/exit3') &"
 for _ in $(seq 20); do [ -s "$work/exit3" ] && break; sleep 0.5; done
 [ "$(cat "$work/exit3" 2>/dev/null)" = 3 ] && ok "outside any pane it exits 3" || bad "outside any pane it exits 3 (got '$(cat "$work/exit3" 2>/dev/null)')"
+check "the exit-3 message lists the adapters" grep -q "adapters:" "$work/exit3.err"
 
 # --- real rex, in a throwaway session so no user pane is ever touched
 if command -v rex >/dev/null 2>&1 && rex whoami >/dev/null 2>&1; then
