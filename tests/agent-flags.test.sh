@@ -7,7 +7,7 @@
 # Needs: bash, grep.
 set -u
 cd "$(dirname "$0")/.."
-doc=skills/multiplexers/delegate-to-pane/MODELS.md
+doc=skills/multiplexers/delegate/MODELS.md
 pass=0; failn=0; skipped=""
 # "<agent> --flag" pairs, where <agent> is claude, codex, pi, or opencode with its subcommand.
 pairs=$(grep -Eo '(claude|codex|pi|opencode run|opencode) --[a-z][a-z-]*' "$doc" | sort -u)

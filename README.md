@@ -40,8 +40,8 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 
 ### [Multiplexers](./skills/multiplexers/README.md)
 
-- **[delegate-to-pane](./skills/multiplexers/delegate-to-pane/SKILL.md)**: Delegation policy inside any terminal multiplexer or agent workspace: a visible pane per subagent, an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks for follow-up skills or subagents, and a close gate on verified completion.
-- **[run-in-pane](./skills/multiplexers/run-in-pane/SKILL.md)**: Run dev servers, studios, watchers and other long-running processes in visible, titled panes instead of the background.
+- **[delegate](./skills/multiplexers/delegate/SKILL.md)**: Run a subagent in its own visible multiplexer pane with an English brief, a model matched to the task class (research, reasoning, execution, review), event hooks and a close gate on verified completion. Invoked by name, never by the agent on its own.
+- **[run-in-pane](./skills/multiplexers/run-in-pane/SKILL.md)**: Start dev servers, watchers, tunnels and other commands that keep running in visible, titled panes the user can watch and stop, instead of the background. Works in any terminal tool through adapter files.
 
 ### [Learning](./skills/learning/README.md)
 
@@ -56,7 +56,7 @@ bash tests/run.sh
 
 - `tests/lint-skills.py` checks every skill against the checklist in `AGENTS.md`: name, description, READMEs, plugin manifest, Codex metadata, links, harness-specific names.
 - `tests/pane.test.sh` checks `pane.sh` (ledger, adapters, self-location) on a fake adapter and on real rex and tmux; `tests/herdr.test.sh` runs only inside a herdr pane.
-- `tests/tmux-e2e.test.sh` runs the pane flows of `delegate-to-pane` and `run-in-pane` on a real tmux server, with a fake agent and a local dev server.
+- `tests/tmux-e2e.test.sh` runs the pane flows of `delegate` and `run-in-pane` on a real tmux server, with a fake agent and a local dev server.
 
 They also run on every push and pull request.
 

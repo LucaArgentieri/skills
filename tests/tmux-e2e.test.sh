@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end test of the pane flows of delegate-to-pane and run-in-pane on a
+# End-to-end test of the pane flows of delegate and run-in-pane on a
 # real tmux server, with a fake agent standing in for claude/codex/opencode.
 #
 # Usage: bash tests/tmux-e2e.test.sh
@@ -46,7 +46,7 @@ EOF
 T new-session -d -s work -x 220 -y 50 -c "$work"
 parent="$(T display -p -t work '#{pane_id}')"
 
-echo "# delegate-to-pane"
+echo "# delegate"
 child="$(T split-window -h -d -t "$parent" -c "$work" -P -F '#{pane_id}' "bash '$work/fake-agent.sh'")"
 [ -n "$child" ] && pane_exists "$child" && ok "split a pane beside the parent" || bad "split a pane"
 [ "$(T display -p -t "$parent" '#{pane_active}')" = 1 ] && ok "focus stays on the parent" || bad "focus moved"
