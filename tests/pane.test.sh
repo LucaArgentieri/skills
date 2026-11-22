@@ -61,8 +61,10 @@ check "close --all leaves the user pane alone" test -f "$PANE_MOCK_DIR/user-pane
 unset PANE_ADAPTER
 
 # --- unsupported multiplexer exits 3
-env -u REX_SESSION -u TMUX bash "$PANE" list >/dev/null 2>&1
-[ $? -eq 3 ] && ok "no supported multiplexer exits 3" || bad "no supported multiplexer exits 3"
+# Orphaned on purpose: reparented to init, its ancestors hold no pane, even when this test runs inside one.
+env -u REX_SESSION -u REX_BLOCK -u TMUX -u TMUX_PANE bash -c "(sleep 1; bash '$PANE' list >/dev/null 2>&1; echo \$? > '$work/exit3') &"
+for _ in $(seq 20); do [ -s "$work/exit3" ] && break; sleep 0.5; done
+[ "$(cat "$work/exit3" 2>/dev/null)" = 3 ] && ok "outside any pane it exits 3" || bad "outside any pane it exits 3 (got '$(cat "$work/exit3" 2>/dev/null)')"
 
 # --- real rex, in a throwaway session so no user pane is ever touched
 if command -v rex >/dev/null 2>&1 && rex whoami >/dev/null 2>&1; then
@@ -77,8 +79,16 @@ if command -v rex >/dev/null 2>&1 && rex whoami >/dev/null 2>&1; then
     check "rex: close refuses the user's own block" refused bash "$PANE" close "$blk"
     check "rex: close accepts the owned block" bash "$PANE" close "$rid"
     check "rex: the owned block is gone" bash -c "! bash '$PANE' list | grep -qx '$rid'"
+    # an agent that strips the environment: the script must find its own pane
+    unset REX_SESSION REX_BLOCK REX_SERVER
+    export PANE_LEDGER="$work/rex-ledger2"
+    rex split -s "$sess" -b "$blk" --split=below --focus=false --label "test: stripped env" -c "$work" -- \
+      sh -c "env -u REX_SESSION -u REX_BLOCK -u REX_SERVER bash '$PANE' open --title 'found: me' -- sleep 20 > '$work/stripped.out' 2>&1; sleep 20" >/dev/null
+    for _ in $(seq 30); do [ -s "$work/stripped.out" ] && break; sleep 0.5; done
+    sid=$(head -n1 "$work/stripped.out")
+    case "$sid" in block:*) ok "rex: pane.sh finds its pane without REX_SESSION" ;; *) bad "rex: pane.sh finds its pane without REX_SESSION (got '$(cat "$work/stripped.out")')" ;; esac
+    rex block ls -s "$sess" --json | grep -q "\"block_id\": \"$sid\"" && ok "rex: the pane opened from the stripped shell is in the right session" || bad "rex: the pane opened from the stripped shell is in the right session"
     rex kill "$sess" >/dev/null 2>&1
-    unset REX_SESSION REX_BLOCK
   else
     echo "skip: rex could not create a test session"
   fi
@@ -93,6 +103,10 @@ if command -v tmux >/dev/null 2>&1; then
   tsock=$(tmux -L "pane-$$" display-message -p '#{socket_path}')
   first=$(tmux -L "pane-$$" display-message -p -t t '#{pane_id}')
   T() { env TMUX="$tsock,1,0" TMUX_PANE="$first" bash "$PANE" "$@"; }
+  # an agent that strips the environment: the script must find its own pane
+  tmux -L "pane-$$" new-window -d -t t: -n stripped "env -u TMUX -u TMUX_PANE bash '$PANE' open --title 'found: me' -- sleep 20 > '$work/tmux-stripped.out' 2>&1; sleep 20"
+  for _ in $(seq 20); do [ -s "$work/tmux-stripped.out" ] && break; sleep 0.5; done
+  case "$(head -n1 "$work/tmux-stripped.out")" in %*) ok "tmux: pane.sh finds its pane without TMUX" ;; *) bad "tmux: pane.sh finds its pane without TMUX (got '$(cat "$work/tmux-stripped.out")')" ;; esac
   tid=$(T open --title "test: tmux" -- sh -c 'echo tmux-ready; sleep 30')
   case "$tid" in %*) ok "tmux: open returns a pane ID" ;; *) bad "tmux: open returns a pane ID (got '$tid')" ;; esac
   check "tmux: wait sees the output" T wait "$tid" 'tmux-ready' 10
