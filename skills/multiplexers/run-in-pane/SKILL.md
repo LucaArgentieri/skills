@@ -1,6 +1,6 @@
 ---
 name: run-in-pane
-description: Start dev servers, watchers, tunnels and other commands that keep running in their own visible, titled terminal pane the user can watch and stop, instead of in the background. Use before starting a command that does not exit on its own (`bun run dev`, `npm run dev`, `--watch`, `serve`, `docker compose up`, `tail -f`), whether you are the main agent or a subagent. For handing a task to another agent use delegate.
+description: Start dev servers, watchers, tunnels and other commands that keep running in their own visible, titled terminal pane the user can watch and stop, instead of in the background. Use when the user asks you to start a process that keeps running (`bun run dev`, `npm run dev`, `--watch`, `serve`, `docker compose up`, `tail -f`), or to show a build, test or script in a visible pane. Otherwise not for commands that finish on their own. For handing a task to another agent use delegate.
 ---
 
 # Run in a pane
