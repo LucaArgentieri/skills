@@ -45,7 +45,7 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 
 ### [Learning](./skills/learning/README.md)
 
-- **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn the corrections of a session into one-line rules in the project's `AGENTS.md`.
+- **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn corrections, rewrites and confirmed choices into when-then notes in the project's `AGENTS.md`.
 - **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
 
 ## Tests

@@ -26,4 +26,4 @@ Files each agent loads in every project. Dreaming writes its block into each one
 
 ## Lesson blocks
 
-The `autolearn` block of a project sits in its `AGENTS.md`, between `<!-- autolearn:start -->` and `<!-- autolearn:end -->`. The project path comes from the transcript (Claude Code encodes it in the folder name, the others record a `cwd`).
+The `autolearn` blocks of a project sit in its `AGENTS.md` files (the root one, and a package's own for lessons about that package), between `<!-- autolearn:start -->` and `<!-- autolearn:end -->`. Each note carries a count (`2×`): use it as evidence. The project path comes from the transcript (Claude Code encodes it in the folder name, the others record a `cwd`).
