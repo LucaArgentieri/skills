@@ -74,7 +74,7 @@ Skills run in any agent that reads the [Agent Skills](https://agentskills.io) fo
 - **Name the action, not the tool.** "Ask the user", "fetch the page", "search the codebase", "track the steps as a todo list". Tool names (`AskUserQuestion`, `WebFetch`, `Task`, `TodoWrite`, `Skill`) exist in one harness only.
 - **Other skills by bare name.** "Run the `ebook-typesetting` skill", never `/ebook-typesetting` (slash syntax differs per harness) and never a `../other-skill/FILE.md` link.
 - **Subagents are optional.** Write "in a subagent with a fresh context if your agent supports one, otherwise inline". The skill works both ways.
-- **No harness variables or paths.** Paths are relative to the skill folder. `${CLAUDE_PLUGIN_ROOT}`, `~/.claude/...` and similar stay out of skill files.
+- **No harness variables or paths.** Paths are relative to the skill folder. `${CLAUDE_PLUGIN_ROOT}`, `~/.claude/...` and similar stay out of skill files. One exception: a skill whose job is to reach every agent (`autolearn`, `dreaming`) may name each agent's global instructions file, listing all of them, and writes there only a marked block that references its own document.
 - **Plain runtimes in `assets/`.** Scripts need only `node`, `python3` or `bash`, with dependencies listed in the header comment. They print results to stdout so any agent can read them.
 - **No model-specific abilities assumed.** When a step needs image input (reading a rendered page), give a text fallback for models without vision, and say what still needs a human look.
 - **Self-contained.** A skill never relies on this file, a `CLAUDE.md`, or any project memory being loaded.
