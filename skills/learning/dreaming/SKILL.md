@@ -1,32 +1,31 @@
 ---
 name: dreaming
-description: Study how the user works across recent agent sessions, projects and commits, and distil it into a working profile every agent loads, so agents need fewer corrections. Use when the user asks to run dreaming or to align agents to how they work ("impara come lavoro"), and for its weekly scheduled run. For lessons from the current session in one project use autolearn.
+description: Learn how the user works from their recent sessions with every agent and their commits, and keep it in one profile that every agent reads, whatever the model. Use for its weekly scheduled run, or when the user asks to run dreaming or to align agents to how they work ("impara come lavoro"). For notes about one project use autolearn.
 ---
 
 # Dreaming
 
-Learn the craft and put it aside. While the user is away, read how they worked this week, find the **patterns** behind their corrections and choices, and write them into a **profile** that every agent loads at startup.
+Learn the craft and put it aside. Once a week, read how the user worked with their agents, find the **patterns** behind their corrections and choices, and keep them in one **profile**. Every agent, on any model, reads that profile at the start of every session.
 
-`autolearn` keeps per-project notes during a session. Dreaming works across projects and sessions, and promotes lessons that turn out to be about the user rather than one project.
+It works across all projects. Lessons about a single project are the job of the `autolearn` skill.
 
 ## Hard rules
 
-1. **Sources are read-only.** Transcripts, repos and `autolearn` notes are evidence. The only files you write are listed in steps 3 and 4.
-2. **No secrets, no code.** Tokens, keys, private hostnames, other people's data and pasted code never reach the profile. Rules describe how the user works.
-3. **Inside the markers only.** In each global instructions file, edit only between `<!-- dreaming:start -->` and `<!-- dreaming:end -->`.
+1. **One profile.** `~/.agents/dreaming/profile.md` is the only copy of the rules. Global instruction files hold a reference to it, never the rules themselves.
+2. **The user's words only.** Evidence is what a person typed or did. Sessions started by another agent (a brief such as `CLASS:` / `TASK:`), tool output and system text are not the user.
+3. **No secrets, no code.** Tokens, keys, private hostnames, other people's data and pasted code never reach the profile.
 4. **Evidence or nothing.** A rule needs two sessions showing it, or one explicit "always" or "never" from the user.
 
 ## Steps
 
 ### 1. Gather evidence
 
-The window runs from the date in `~/.agents/dreaming/last-run` to now, or the last 7 days when that file is missing. Read [SOURCES.md](SOURCES.md) for where each agent keeps its transcripts and global instructions, then collect:
+The window runs from the date in `~/.agents/dreaming/last-run` to now, or the last 7 days when that file is missing. Read [SOURCES.md](SOURCES.md) for where each agent keeps its sessions, then collect:
 
-- every session transcript in the window, from every agent installed
-- the `autolearn` notes of every project those sessions touched
-- the git history of those projects: commits where the user reworked what an agent wrote
+- every session in the window, from every agent installed, keeping only messages a person typed
+- the git history of the projects those sessions touched: commits where the user reworked what an agent wrote
 
-**Done when** each source is read, or noted as missing, with the reason.
+**Done when** each source is read, or noted as missing with the reason.
 
 ### 2. Extract signals
 
@@ -36,55 +35,48 @@ Scan every session in the window for:
 - **repeats**: the same instruction in different sessions
 - **rewrites**: the user's own edits on top of agent commits
 - **statements**: "always", "never", "I prefer", "preferisco", "sempre", "mai"
+- **workflow**: what the user does, not only says: the order they work in, when they commit, what they check before approving, which panes they open
 - **routines**: the same kind of task requested again and again
 
-Note each with its session, project and date, and a few words of quote.
+Note each with its session, project and date.
 
 **Done when** every session in the window has been scanned.
 
-### 3. Distil rules
+### 3. Update the profile
 
-Group the signals into rules about **style** (how to talk to the user), **workflow** (how to work), and **tooling** (tools and commands the user prefers). A signal true for one project only goes into that project's `autolearn` notes instead, in their format.
+Group the signals into rules about **style** (how to talk to the user), **workflow** (how to work) and **tooling** (tools and commands they prefer). Leave out signals that hold for one project only.
 
 Merge with the current profile:
 
-- **reinforced**: raise its evidence count and update its last-seen date
+- **reinforced**: raise its count and update its last-seen date
 - **contradicted**: replace it, because the newest evidence wins
 - **new**: add it only when hard rule 4 holds
 
-Write each rule as one positive line with its reason. Keep the profile under 40 rules: merge close ones first.
+One positive line per rule, with its reason, count and last-seen date. At most 40 rules: merge close ones first.
 
-**Done when** every signal is used in a rule, sent back to a project, or set aside as one-off.
+**Done when** every signal is a rule, or set aside as one project's or one-off.
 
-### 4. Write
+### 4. Reference it from every agent
 
-1. `~/.agents/dreaming/profile.md` is the **single source**: every rule with its evidence count and last-seen date.
-2. Copy the rule lines only, without evidence, into the marked block of each global instructions file that exists ([SOURCES.md](SOURCES.md)). Back the file up first as `<file>.dream-<date>.bak`. Create the block at the end of the file when it is missing:
+Make sure each global instructions file that exists ([SOURCES.md](SOURCES.md)) carries this block once, and add it when missing:
 
-   ```markdown
-   ## How I work
-   <!-- dreaming:start -->
-   - ...
-   <!-- dreaming:end -->
-   ```
+```markdown
+<!-- dreaming:start -->
+How I work: read ~/.agents/dreaming/profile.md at the start of every session and follow it.
+<!-- dreaming:end -->
+```
 
-3. Write today's date to `~/.agents/dreaming/last-run`.
+In `~/.claude/CLAUDE.md`, put `@~/.agents/dreaming/profile.md` inside the block instead: Claude Code then loads the profile by itself. Edit only between the markers.
 
-**Done when** every existing global instructions file carries the same block as the profile.
+**Done when** every existing global instructions file references the profile.
 
-### 5. Propose skills
+### 5. Report
 
-For each **routine** seen three times or more in the window, propose a skill: a name, one line on what it would do, and the sessions it came from. Propose only. Creating it is the user's call.
-
-**Done when** every routine is either proposed or found too varied to automate.
-
-### 6. Report
-
-Write `~/.agents/dreaming/<date>.md`: rules added, changed and removed, each with its evidence; skill proposals; sources that were missing.
+Write `~/.agents/dreaming/<date>.md`: rules added, changed and removed with their evidence, routines worth a skill (name and one line, as a proposal), and sources that were missing. Write today's date to `~/.agents/dreaming/last-run`.
 
 In an interactive run, also summarise it to the user in their language. A scheduled run asks nothing: the report is its answer.
 
-**Done when** the report exists and, in an interactive run, the user has the summary.
+**Done when** the report and `last-run` are written.
 
 ## Weekly run
 

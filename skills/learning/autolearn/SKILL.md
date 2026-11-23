@@ -7,7 +7,7 @@ description: Keep private notes on how agents should work for this user in this 
 
 Every correction is a **lesson** about how the user wants agents to work in this project. This skill keeps those lessons as **notes**: agent instructions, private to the user, outside the repository.
 
-Notes are not team documentation. They describe the user's workflow and how agents should fit it, never project rules for other developers. Habits that hold in every project are the job of the `dreaming` skill, which reads these notes and promotes them.
+Notes are not team documentation. They describe the user's workflow and how agents should fit it, never project rules for other developers. Habits that hold in every project are the job of the `dreaming` skill.
 
 ## Hard rules
 

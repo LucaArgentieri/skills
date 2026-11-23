@@ -46,7 +46,7 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 ### [Learning](./skills/learning/README.md)
 
 - **[autolearn](./skills/learning/autolearn/SKILL.md)**: Private, per-project notes on how agents should work for you, learned from corrections, rewrites and confirmations, loaded at the start of every session.
-- **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
+- **[dreaming](./skills/learning/dreaming/SKILL.md)**: Weekly: learn how you work from your sessions with every agent, and keep it in one profile every agent reads, whatever the model.
 
 ## Tests
 
