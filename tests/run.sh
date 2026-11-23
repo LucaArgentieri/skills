@@ -2,7 +2,7 @@
 # Run every test in this folder. Usage: bash tests/run.sh
 cd "$(dirname "$0")/.."
 status=0
-for t in "python3 tests/lint-skills.py" "bash tests/tmux-e2e.test.sh" "bash tests/pane.test.sh" "bash tests/herdr.test.sh" "bash tests/agent-flags.test.sh"; do
+for t in "python3 tests/lint-skills.py" "bash tests/autolearn.test.sh" "bash tests/tmux-e2e.test.sh" "bash tests/pane.test.sh" "bash tests/herdr.test.sh" "bash tests/agent-flags.test.sh"; do
   echo "== $t"
   $t || status=1
 done

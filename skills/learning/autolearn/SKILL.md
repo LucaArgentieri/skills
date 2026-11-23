@@ -1,60 +1,61 @@
 ---
 name: autolearn
-description: Turn what the user taught you in this project into short when-then notes in its agent instructions, so the next session starts aligned. Use when the user corrects you, repeats an instruction or rewrites your work ("no, così", "te l'ho già detto"), confirms a non-obvious choice, when a task ends, or when asked to save what was learned. For habits across all projects use dreaming.
+description: Keep private notes on how agents should work for this user in this project, learned from their corrections, rewrites and confirmations, and load them at the start of every session. Use at the start of work in a git project, when the user corrects you, repeats an instruction or rewrites your work ("no, così", "te l'ho già detto"), when they confirm a non-obvious choice, or when asked to save what was learned. For habits across all projects use dreaming.
 ---
 
 # Autolearn
 
-Every correction is a **lesson**. This skill writes each one as a **note** in the project's agent instructions, which every agent loads at the start of the next session.
+Every correction is a **lesson** about how the user wants agents to work in this project. This skill keeps those lessons as **notes**: agent instructions, private to the user, outside the repository.
 
-It covers one project. How the user works across all projects is the job of the `dreaming` skill, which reads these notes and promotes the ones that turn out to be about the user.
+Notes are not team documentation. They describe the user's workflow and how agents should fit it, never project rules for other developers. Habits that hold in every project are the job of the `dreaming` skill, which reads these notes and promotes them.
 
 ## Hard rules
 
-1. **Inside the markers only.** Edit only between `<!-- autolearn:start -->` and `<!-- autolearn:end -->`. Every other line of the file is the user's.
-2. **No secrets.** Tokens, keys, passwords, personal data and private hostnames never go into a note.
-3. **The user commits.** Leave the change uncommitted.
-
-## Where notes live
-
-The `AGENTS.md` nearest to what the lesson is about: the root one for the whole project, a package's own `AGENTS.md` for a lesson about that package only. Create the file and the block when missing, with the pointer line above it:
-
-```markdown
-## Learned
-
-When the user corrects you, repeats an instruction or rewrites your work, record it with the `autolearn` skill.
-
-<!-- autolearn:start -->
-- When running tests locally: use `pnpm test:unit`. Why: `pnpm test` needs Docker. (1×, 2026-11-20)
-<!-- autolearn:end -->
-```
-
-The pointer line is what makes the next agent use this skill: it sits in a file that is always loaded.
-
-When the project has a `CLAUDE.md` that neither imports (`@AGENTS.md`) nor mentions `AGENTS.md`, ask the user once whether to add `@AGENTS.md` to it.
-
-## Signals
-
-- **Correction**: you did X, the user wanted Y.
-- **Repeat**: the user said the same thing twice.
-- **Rewrite**: the user edited code you wrote. `git diff` on files you touched shows what they changed.
-- **Confirmation**: the user approved a non-obvious choice ("perfetto, così"). Keeps the next agent from undoing it.
-- **Gotcha**: a command or path that failed, then worked another way.
+1. **Outside the repository.** Notes live only in the file `assets/notes-path.sh` prints. Repository files (`AGENTS.md`, `CLAUDE.md`, READMEs) stay untouched.
+2. **Agent behaviour only.** Each note says what an agent should do. Facts that every developer needs belong in the team's docs: mention them to the user instead.
+3. **No secrets.** Tokens, keys, passwords, personal data and private hostnames never go into a note.
 
 ## Steps
 
-### 1. Filter
+### 1. Load
 
-A signal becomes a note only when it passes both tests:
+At the start of work in a git project, find and read this project's notes:
 
-- **Next week**: it would still be true and useful in a different task. "Make this button red" fails, "Buttons use the `variant` prop, not classes" passes.
-- **Verified**: the user said it, or you reproduced it (the command really fails, the path really exists). A guess about why something broke is not a note.
+```bash
+bash assets/notes-path.sh
+```
 
-Skip what the repo already says (README, config, scripts) and habits that apply to every project (`dreaming` collects those).
+It prints one path per repository, the same in every worktree and clone (for example `~/.agents/autolearn/github.com-owner-repo.md`). Read the file when it exists and follow its notes for the whole session.
 
-**Done when** every signal of the session is a candidate note or dropped for a stated reason.
+On first use, make sure every agent loads the notes: add this block at the end of each global instructions file that exists, unless it is already there.
 
-### 2. Write the note
+```markdown
+<!-- autolearn:start -->
+In a git project, before starting work, use the `autolearn` skill to load your notes for that project, and to record lessons when the user corrects you.
+<!-- autolearn:end -->
+```
+
+Global files: `~/.claude/CLAUDE.md` (Claude Code), `~/.codex/AGENTS.md` (Codex), `~/.config/opencode/AGENTS.md` (opencode), `~/.pi/agent/AGENTS.md` (pi). Edit only between those markers.
+
+**Done when** the notes are read (or there are none yet), and every existing global file carries the block.
+
+### 2. Catch signals
+
+- **Correction**: you worked one way, the user wanted another.
+- **Repeat**: the user said the same thing twice.
+- **Rewrite**: the user edited what you produced. `git diff` on files you touched shows how.
+- **Confirmation**: the user approved a non-obvious choice ("perfetto, così").
+- **Workflow**: how the user wants a step done here: when to commit, what to show before going on, which pane runs what.
+
+A signal becomes a note only when it passes three tests:
+
+- **Agent behaviour**: it tells an agent how to act. "The API uses REST" fails; "When changing the API: show me the diff before running migrations" passes.
+- **Next week**: it would still hold in a different task. "Make this button red" fails.
+- **Verified**: the user said it, or you reproduced it. A guess about why something broke is not a note.
+
+**Done when** every signal of the session is a note or dropped for a stated reason.
+
+### 3. Write the note
 
 Condition first, so the next agent recognises the moment it applies. In English, under about 30 words:
 
@@ -62,30 +63,29 @@ Condition first, so the next agent recognises the moment it applies. In English,
 - When <situation>: <what to do>. Why: <reason>. (<n>×, <date>)
 ```
 
-- `- When adding colours: use the tokens in src/theme.ts. Why: hard-coded hex was rejected. (2×, 2026-11-20)`
+- `- When a feature is done: start the dev server in a pane and wait for my check before committing. Why: I review UI by eye. (3×, 2026-11-23)`
+- `- When editing packages/web styles: use tokens from src/theme.ts. Why: I rejected hard-coded hex. (2×, 2026-11-20)`
 
-Compare with the block before writing:
+A new file starts with `# Autolearn notes` and a line naming the project. Before adding a note:
 
 - **same lesson**: raise its count, update the date, keep the clearer wording
 - **contradicts a note**: replace it, because the user's latest word wins
-- **contradicts the user's own text in the file**: write nothing and ask the user which one holds
-- **already said elsewhere in the file**: skip it
 
 Write each note when it happens, so nothing is lost if the session ends.
 
-**Done when** the lesson is in the block exactly once, and no note contradicts another or the rest of the file.
+**Done when** the lesson is in the file exactly once, and no note contradicts another.
 
-### 3. Prune
+### 4. Prune
 
-Each time you write, check the whole block:
+Each time you write, check the whole file:
 
 - a note naming a path, script or command that no longer exists: remove it
 - more than 30 notes: merge the closest ones, then drop those with the lowest count and the oldest date
 
-**Done when** every note refers to things that exist, and the block has at most 30 notes.
+**Done when** every note refers to things that exist, and the file has at most 30 notes.
 
-### 4. Report
+### 5. Report
 
-In your final summary, in the user's language: the notes added, changed or removed this session, and the file.
+In your final summary, in the user's language: the notes added, changed or removed this session.
 
-**Done when** the user has seen every change to the block.
+**Done when** the user has seen every change to the notes.

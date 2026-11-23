@@ -45,7 +45,7 @@ claude plugin install lucaargentieri-skills@lucaargentieri
 
 ### [Learning](./skills/learning/README.md)
 
-- **[autolearn](./skills/learning/autolearn/SKILL.md)**: Turn corrections, rewrites and confirmed choices into when-then notes in the project's `AGENTS.md`.
+- **[autolearn](./skills/learning/autolearn/SKILL.md)**: Private, per-project notes on how agents should work for you, learned from corrections, rewrites and confirmations, loaded at the start of every session.
 - **[dreaming](./skills/learning/dreaming/SKILL.md)**: Study recent sessions across projects and agents, and distil a working profile every agent loads. Runs weekly.
 
 ## Tests
@@ -55,6 +55,7 @@ bash tests/run.sh
 ```
 
 - `tests/lint-skills.py` checks every skill against the checklist in `AGENTS.md`: name, description, READMEs, plugin manifest, Codex metadata, links, harness-specific names.
+- `tests/autolearn.test.sh` checks that `notes-path.sh` gives one notes file per repository, the same across worktrees, clones and URL forms, with no credentials in the path.
 - `tests/pane.test.sh` checks `pane.sh` (ledger, adapters, self-location) on a fake adapter and on real rex and tmux; `tests/herdr.test.sh` runs only inside a herdr pane.
 - `tests/tmux-e2e.test.sh` runs the pane flows of `delegate` and `run-in-pane` on a real tmux server, with a fake agent and a local dev server.
 

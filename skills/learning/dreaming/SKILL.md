@@ -7,11 +7,11 @@ description: Study how the user works across recent agent sessions, projects and
 
 Learn the craft and put it aside. While the user is away, read how they worked this week, find the **patterns** behind their corrections and choices, and write them into a **profile** that every agent loads at startup.
 
-`autolearn` keeps per-project lessons during a session. Dreaming works across projects and sessions, and promotes lessons that turn out to be about the user rather than one project.
+`autolearn` keeps per-project notes during a session. Dreaming works across projects and sessions, and promotes lessons that turn out to be about the user rather than one project.
 
 ## Hard rules
 
-1. **Sources are read-only.** Transcripts, repos and lesson blocks are evidence. The only files you write are listed in step 4.
+1. **Sources are read-only.** Transcripts, repos and `autolearn` notes are evidence. The only files you write are listed in steps 3 and 4.
 2. **No secrets, no code.** Tokens, keys, private hostnames, other people's data and pasted code never reach the profile. Rules describe how the user works.
 3. **Inside the markers only.** In each global instructions file, edit only between `<!-- dreaming:start -->` and `<!-- dreaming:end -->`.
 4. **Evidence or nothing.** A rule needs two sessions showing it, or one explicit "always" or "never" from the user.
@@ -23,7 +23,7 @@ Learn the craft and put it aside. While the user is away, read how they worked t
 The window runs from the date in `~/.agents/dreaming/last-run` to now, or the last 7 days when that file is missing. Read [SOURCES.md](SOURCES.md) for where each agent keeps its transcripts and global instructions, then collect:
 
 - every session transcript in the window, from every agent installed
-- the `autolearn` block of every project those sessions touched
+- the `autolearn` notes of every project those sessions touched
 - the git history of those projects: commits where the user reworked what an agent wrote
 
 **Done when** each source is read, or noted as missing, with the reason.
@@ -44,7 +44,7 @@ Note each with its session, project and date, and a few words of quote.
 
 ### 3. Distil rules
 
-Group the signals into rules about **style** (how to talk to the user), **workflow** (how to work), and **tooling** (tools and commands the user prefers). A signal true for one project only goes back to that project's `autolearn` block instead.
+Group the signals into rules about **style** (how to talk to the user), **workflow** (how to work), and **tooling** (tools and commands the user prefers). A signal true for one project only goes into that project's `autolearn` notes instead, in their format.
 
 Merge with the current profile:
 

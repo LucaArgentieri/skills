@@ -24,6 +24,6 @@ Files each agent loads in every project. Dreaming writes its block into each one
 | opencode | `~/.config/opencode/AGENTS.md` |
 | pi | `~/.pi/agent/AGENTS.md` |
 
-## Lesson blocks
+## Autolearn notes
 
-The `autolearn` blocks of a project sit in its `AGENTS.md` files (the root one, and a package's own for lessons about that package), between `<!-- autolearn:start -->` and `<!-- autolearn:end -->`. Each note carries a count (`2×`): use it as evidence. The project path comes from the transcript (Claude Code encodes it in the folder name, the others record a `cwd`).
+`autolearn` keeps one notes file per repository in `~/.agents/autolearn/` (or `$AUTOLEARN_HOME`), outside the repository. Its `assets/notes-path.sh`, run in a project folder, prints that project's file. Each note carries a count (`2×`): use it as evidence. The project folder comes from the transcript (Claude Code encodes it in the folder name, the others record a `cwd`).
